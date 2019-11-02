@@ -30,12 +30,12 @@
 #endif
 #define LOG_USING_NAMESPACE using namespace coap;
 #define LOG_INIT(loggingLevels, outputStream) coap::log & instanceLink = coap::log::createInstance(loggingLevels, outputStream)
-#define LOG(level, ...) {instanceLink.print(level, __FILE__, __func__, __LINE__, __VA_ARGS__ );}
-#define LOG_SET_STREAM(stream) {instanceLink.set_stream(stream);}
-#define LOG_SET_LEVEL(level) {instanceLink.set_level(level);}
-#define LOG_UNSET_LEVEL(level) {instanceLink.unset_level(level);}
-#define LOG_GET_LEVELS(loggingLevels) {loggingLevels = instanceLink.get_loggingLevels();}
-#define LOG_SET_STREAM_FORMAT(flags, mask) {instanceLink.set_stream_format(flags, mask);}
+#define LOG(level, ...) instanceLink.print(level, __FILE__, __func__, __LINE__, __VA_ARGS__ )
+#define LOG_SET_STREAM(stream) instanceLink.set_stream(stream)
+#define LOG_SET_LEVEL(level) instanceLink.set_level(level)
+#define LOG_UNSET_LEVEL(level) instanceLink.unset_level(level)
+#define LOG_GET_LEVELS(loggingLevels) loggingLevels = instanceLink.get_loggingLevels()
+#define LOG_SET_STREAM_FORMAT(flags, mask) instanceLink.set_stream_format(flags, mask)
 
 /*
 #define LOG_PRINT_TIMESTAMP
@@ -58,6 +58,13 @@ using level_t = enum {
 	ALL = (1 << INFO)|(1 << DEBUG)|(1 << WARNING)|(1 << ERROR)|(1 << CRITICAL)
 };
 
+template <typename T>
+std::ostream & operator<<(std::ostream & os,const std::vector<T> &v)
+{
+	for (auto i : v)
+		os << i << "\t";
+	return os;
+}
 
 /**
 */
@@ -148,7 +155,7 @@ public:
 
 	void set_level(level_t level)
 	{
-		assert(level <= CRITICAL && level >= NONE || level == ALL);
+		assert((level <= CRITICAL && level >= NONE) || level == ALL);
 		if (ALL == level || NONE == level)
 		{		
 			_loggingLevels = level;
@@ -158,7 +165,7 @@ public:
 
 	void unset_level(level_t level)
 	{
-		assert(level <= CRITICAL && level >= NONE || level == ALL);
+		assert((level <= CRITICAL && level >= NONE) || level == ALL);
 		if (NONE == level)
 			_loggingLevels = ALL;
 		else if (ALL == level)
@@ -170,7 +177,7 @@ public:
 	{
 		return _loggingLevels;
 	}
-	
+
 	template <typename T>
 	void print(level_t level, const char * file, const char * func, int line, T t) 
 	{

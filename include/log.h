@@ -148,7 +148,7 @@ public:
 
 	void set_level(level_t level)
 	{
-		assert(level <= CRITICAL && level >= NONE || level == ALL);
+		assert((level <= CRITICAL && level >= NONE) || level == ALL);
 		if (ALL == level || NONE == level)
 		{		
 			_loggingLevels = level;
@@ -158,7 +158,7 @@ public:
 
 	void unset_level(level_t level)
 	{
-		assert(level <= CRITICAL && level >= NONE || level == ALL);
+		assert((level <= CRITICAL && level >= NONE) || level == ALL);
 		if (NONE == level)
 			_loggingLevels = ALL;
 		else if (ALL == level)

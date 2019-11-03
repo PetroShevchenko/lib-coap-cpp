@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include <iostream>
+#include "log.h"
 
 namespace coap {
 
@@ -94,7 +95,6 @@ private:
 
 	using message_t = 
 	struct {
-		
 		union {
 			std::uint8_t asByte;
 			#pragma pack(push,1)

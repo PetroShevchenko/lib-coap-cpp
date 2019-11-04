@@ -12,8 +12,8 @@ int main()
 	
 		static packet & instance = new_packet();
 	
-		instance.set_message_version(0b11);
-		instance.set_message_type(0b11);
+		instance.set_message_version(0x3);
+		instance.set_message_type(0x3);
 		instance.set_message_tokenLength(1);
 		//instance.set_message_headerInfo(0x43);
 

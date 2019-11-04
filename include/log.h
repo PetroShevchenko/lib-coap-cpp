@@ -36,7 +36,7 @@
 #define LOG_UNSET_LEVEL(level) instanceLink.unset_level(level)
 #define LOG_GET_LEVELS(loggingLevels) loggingLevels = instanceLink.get_loggingLevels()
 #define LOG_SET_STREAM_FORMAT(flags, mask) instanceLink.set_stream_format(flags, mask)
-
+#define LOG_UNUSED_PARAMETER(p) (void)(p)
 /*
 #define LOG_PRINT_TIMESTAMP
 #define LOG_PRINT_DATE
@@ -105,6 +105,8 @@ private:
 		if (((1 << level) & _loggingLevels) == 0) return false;		
 #ifdef LOG_PRINT_LEVEL		
 		*_stream << "[" << printableLevel[level] << "] ";
+#else
+		LOG_UNUSED_PARAMETER(level);
 #endif
 #ifdef LOG_PRINT_TIMESTAMP
 		std::chrono::time_point<std::chrono::system_clock> now;
@@ -120,13 +122,19 @@ private:
 #ifdef LOG_PRINT_FILE_NAME	
 		*_stream << file;
 		*_stream << ":";
+#else
+		LOG_UNUSED_PARAMETER(file);
 #endif
 #ifdef LOG_PRINT_FUNCTION_NAME	
 		*_stream  << func;
 		*_stream << ":";
+#else
+		LOG_UNUSED_PARAMETER(func);
 #endif
 #ifdef LOG_PRINT_LINE_OF_CODE
 		*_stream << line ;
+#else
+		LOG_UNUSED_PARAMETER(line);
 #endif
 		*_stream	<< "] ";
 		return true;	 

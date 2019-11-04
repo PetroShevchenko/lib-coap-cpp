@@ -8,67 +8,68 @@
 namespace coap {
 
 enum {
-	COAP_VERSION = 0b01
+	COAP_VERSION = 0x1
 };
 
 using message_type_t = 
 enum {
-	CONFIRMABLE 	= 0b00,
-	NON_CONFIRMABLE = 0b01,
-	ACKNOWLEDGEMENT = 0b10,
-	RESET 			= 0b11
+	CONFIRMABLE 	= 0x0,
+	NON_CONFIRMABLE = 0x1,
+	ACKNOWLEDGEMENT = 0x2,
+	RESET 			= 0x3
 };	
 
 using message_code_class_t = 
 enum {
-	METHOD 			= (0b000 << 5),
-	SUCCESS 		= (0b010 << 5),
-	CLIENT_ERROR 	= (0b100 << 5),
-	SERVER_ERROR 	= (0b101 << 5),
-	SIGNALING_CODES = (0b111 << 5)
+	METHOD 			= (0x0 << 5),
+	SUCCESS 		= (0x2 << 5),
+	CLIENT_ERROR 	= (0x4 << 5),
+	SERVER_ERROR 	= (0x5 << 5),
+	SIGNALING_CODES = (0x7 << 5)
 };
 
 using message_code_t = 
 enum {
-	EMPTY 	= METHOD | 0b00000,
-	GET 	= METHOD | 0b00001,
-	POST	= METHOD | 0b00010,
-	PUT		= METHOD | 0b00011,
-	DELETE 	= METHOD | 0b00100,
-	FETCH 	= METHOD | 0b00101,
-	PATCH 	= METHOD | 0b00110,
-	IPATCH 	= METHOD | 0b00111,
-	CREATED		= SUCCESS | 0b00001,
-	DELETED		= SUCCESS | 0b00010,
-	VALID		= SUCCESS | 0b00011,
-	CHANGED		= SUCCESS | 0b00100,
-	CONTENT		= SUCCESS | 0b00101,
-	CONTINUE 	= SUCCESS | 0b111111,
-	BAD_REQUEST		= CLIENT_ERROR | 0b00000,
-	UNAUTHORIZED 	= CLIENT_ERROR | 0b00001,
-	BAD_OPTION 		= CLIENT_ERROR | 0b00010,
-	FORBIDDED		= CLIENT_ERROR | 0b00011,
-	NOT_FOUND		= CLIENT_ERROR | 0b00100,
-	METHOD_NOT_ALLOWED 	= CLIENT_ERROR | 0b00101,
-	NOT_ACCEPTABLE		= CLIENT_ERROR | 0b00110,
-	REQUEST_ENTITY_INCOMPLETE 	= CLIENT_ERROR | 0b01000,
-	CONFLICT 			= CLIENT_ERROR | 0b01001,
-	PRECONDITION_FAILED	= CLIENT_ERROR | 0b01100,
-	REQUEST_ENTITY_TOO_LARGE 	= CLIENT_ERROR | 0b01101,
-	UNSUPPORTED_CONTENT_FORMAT 	= CLIENT_ERROR | 0b01111,
-	INTERNAL_SERVER_ERROR		= SERVER_ERROR | 0b00000,
-	NOT_IMPLEMENTED				= SERVER_ERROR | 0b00001,
-	BAD_GATEWAY					= SERVER_ERROR | 0b00010,
-	SERVICE_UNAVAILABLE			= SERVER_ERROR | 0b00011,
-	GATEWAY_TIMEOUT				= SERVER_ERROR | 0b00100,
-	PROXYING_NOT_SUPPORTED		= SERVER_ERROR | 0b00101,
-	UNASSIGNED 	= SIGNALING_CODES  | 0b00000,
-	CSM		 	= SIGNALING_CODES  | 0b00001,
-	PING 		= SIGNALING_CODES  | 0b00010,
-	PONG 		= SIGNALING_CODES  | 0b00011,	
-	RELEASE		= SIGNALING_CODES  | 0b00100,	
-	ABORT 		= SIGNALING_CODES  | 0b00101
+	EMPTY 	= METHOD | 0x0,
+	GET 	= METHOD | 0x1,
+	POST	= METHOD | 0x2,
+	PUT		= METHOD | 0x3,
+	DELETE 	= METHOD | 0x4,
+	FETCH 	= METHOD | 0x5,
+	PATCH 	= METHOD | 0x6,
+	IPATCH 	= METHOD | 0x7,
+	CREATED		= SUCCESS | 0x1,
+	DELETED		= SUCCESS | 0x2,
+	VALID		= SUCCESS | 0x3,
+	CHANGED		= SUCCESS | 0x4,
+	CONTENT		= SUCCESS | 0x5,
+	CONTINUE 	= SUCCESS | 0x3F,
+	BAD_REQUEST		= CLIENT_ERROR | 0x0,
+	UNAUTHORIZED 	= CLIENT_ERROR | 0x1,
+	BAD_OPTION 		= CLIENT_ERROR | 0x2,
+	FORBIDDED		= CLIENT_ERROR | 0x3,
+	NOT_FOUND		= CLIENT_ERROR | 0x4,
+	METHOD_NOT_ALLOWED 	= CLIENT_ERROR | 0x5,
+	NOT_ACCEPTABLE		= CLIENT_ERROR | 0x6,
+	REQUEST_ENTITY_INCOMPLETE 	= CLIENT_ERROR | 0x8,
+	CONFLICT 			= CLIENT_ERROR | 0x9,
+	PRECONDITION_FAILED	= CLIENT_ERROR | 0xC,
+	REQUEST_ENTITY_TOO_LARGE 	= CLIENT_ERROR | 0xD,
+	UNSUPPORTED_CONTENT_FORMAT 	= CLIENT_ERROR | 0xF,
+	INTERNAL_SERVER_ERROR		= SERVER_ERROR | 0x0,
+	NOT_IMPLEMENTED				= SERVER_ERROR | 0x1,
+	BAD_GATEWAY					= SERVER_ERROR | 0x2,
+	SERVICE_UNAVAILABLE			= SERVER_ERROR | 0x3,
+	GATEWAY_TIMEOUT				= SERVER_ERROR | 0x4,
+	PROXYING_NOT_SUPPORTED		= SERVER_ERROR | 0x5,
+	UNASSIGNED 	= SIGNALING_CODES  | 0x0,
+	CSM		 	= SIGNALING_CODES  | 0x1,
+	PING 		= SIGNALING_CODES  | 0x2,
+	PONG 		= SIGNALING_CODES  | 0x3,	
+	RELEASE		= SIGNALING_CODES  | 0x4,	
+	ABORT 		= SIGNALING_CODES  | 0x5
 };
+
 
 class packet;
 
@@ -93,6 +94,20 @@ private:
 	static packet * instanceP;
 	static packetDestroyer destroyer;
 
+	using option_t = 
+	struct {
+		union {
+			std::uint8_t asByte;
+			#pragma pack(push,1)
+			struct {
+				std::uint8_t delta : 4;
+				std::uint8_t length : 4;
+			} asBitfield;
+			#pragma pack(pop)
+		} header;
+		std::uint8_t * value;
+	};
+
 	using message_t = 
 	struct {
 		union {
@@ -102,7 +117,7 @@ private:
 				std::uint8_t version: 2;
 				std::uint8_t type: 2;
 				std::uint8_t tokenLength: 4;
-			} asBitmap;
+			} asBitfield;
 			#pragma pack(pop)
 		} headerInfo;
 		
@@ -112,12 +127,13 @@ private:
 			struct {
 				std::uint8_t codeClass: 3;
 				std::uint8_t codeDetail: 5;
-			} asBitmap;
+			} asBitfield;
 			#pragma pack(pop)
 		} code;
 
 		std::uint16_t messageId;
 		std::vector <uint8_t> token;
+		std::vector <option_t> options;
 		const std::uint8_t payloadMarker = 0xFF;
 		std::vector <uint8_t> payload;
 	};
@@ -134,15 +150,15 @@ public:
 	}
 	void set_message_version(std::uint8_t version)
 	{
-		message.headerInfo.asBitmap.version = version;
+		message.headerInfo.asBitfield.version = version;
 	}
 	void set_message_type(std::uint8_t type)
 	{
-		message.headerInfo.asBitmap.type = type;
+		message.headerInfo.asBitfield.type = type;
 	}
 	void set_message_tokenLength(std::uint8_t tokenLength)
 	{
-		message.headerInfo.asBitmap.tokenLength = tokenLength;
+		message.headerInfo.asBitfield.tokenLength = tokenLength;
 	}
 	void set_message_code(std::uint8_t code)
 	{
@@ -150,11 +166,11 @@ public:
 	}
 	void set_message_codeClass(std::uint8_t codeClass)
 	{
-		message.code.asBitmap.codeClass = codeClass;
+		message.code.asBitfield.codeClass = codeClass;
 	}
 	void set_message_codeDetail(std::uint8_t codeDetail)
 	{
-		message.code.asBitmap.codeDetail = codeDetail;
+		message.code.asBitfield.codeDetail = codeDetail;
 	}
 	void set_message_messageId(std::uint8_t messageId)
 	{

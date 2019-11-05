@@ -67,11 +67,21 @@ std::ostream & operator<<(std::ostream & os,const std::vector<T> &v)
 }
 
 /**
+	\class log
+	\brief A simple logging system
+	\details This class implements the logging system
+	which has five levels of logging. Each level can be disabled or 
+	enabled regardless of others.
 */
 class log {
 
 private:
-
+	/**
+		\brief Check if a level is printable
+		\param [in] level logging level
+		\return true if it is printable level
+				false otherwise 
+	*/
 	bool is_printable_level(level_t level)
 	{
 		return level > NONE && level <= CRITICAL;  
@@ -86,10 +96,15 @@ private:
 		"CRITICAL"
 	};
 
-	std::uint8_t _loggingLevels;
-	std::ostream * _stream;
-	bool _print_header;
+	std::uint8_t _loggingLevels; /// a bitmap that contained all of enabled levels
+	std::ostream * _stream;		/// stream to output log (for example: cout, cerr, clog , file)
+	bool _print_header;			/// flag to print a log header
 
+	/**
+		\brief Private constructor to create single instance
+		\param [in] loggingLevels bitmap of enabled logging levels
+		\param [in] outputStream  stream to output a log
+	*/
 	log(std::uint8_t loggingLevels, std::ostream &outputStream)
 	{
 		if (NONE == loggingLevels || ALL == loggingLevels)
@@ -98,7 +113,15 @@ private:
 		_stream = &outputStream;
 		_print_header = true;
 	}
-
+	/**
+		\brief Function to print head informatin on the begin of the log
+		\param [in] level printable logging level
+		\param [in] file name of the file in which is called a logging function
+		\param [in] function  name of the function in which is called a logging function
+		\param [in] line  line of a code string for logging
+		\return true if header is printed
+				false if logging level is not enabled, so header is not printed 
+	*/
 	bool print_header(level_t level, const char * file, const char * func, int line)
 	{
 		assert(is_printable_level(level));
@@ -141,16 +164,25 @@ private:
 	}
 
 public:
-	log() = delete;
-	log(const log &) = delete;
-	log & operator=(const log &) = delete;
-
+	log() = delete;/// default constructor is not permitted
+	log(const log &) = delete; /// copy constructor is not permitted
+	log & operator=(const log &) = delete; /// overloaded copy operator is not permitted 
+	/**
+		\brief Static function to create single instance of class
+		\param [in] loggingLevels bitmap of enabled logging levels
+		\param [in] outputStream  stream to output a log
+		\return link on a created class instance
+	*/
 	static log& createInstance(std::uint8_t loggingLevels, std::ostream &outputStream)
 	{
 		static log instance(loggingLevels, outputStream);
 		return instance;
 	}
-
+	/**
+		\brief Setter to set a value of stream
+		\param [in] stream  stream to log
+		\return void
+	*/
 	void set_stream(std::ostream & stream)
 	{
 		log::_stream = &stream;

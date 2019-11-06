@@ -175,6 +175,7 @@ public:
 
 	packet(const packet &) = delete;
 	packet & operator=(const packet &) = delete;
+	~packet();
 
 	void set_message_headerInfo(std::uint8_t headerInfo)
 	{

@@ -4,11 +4,13 @@
 #include <vector>
 #include <iostream>
 #include "log.h"
+#include "error.h"
 
 namespace coap {
 
 enum {
-	COAP_VERSION = 0x1
+	COAP_VERSION = 0x1,
+	PACKET_MIN_LENGTH = 4
 };
 
 using message_type_t = 
@@ -70,12 +72,40 @@ enum {
 	ABORT 		= SIGNALING_CODES  | 0x5
 };
 
+using option_number_t = 
+enum {
+	IF_MATCH 		= 0,
+	URI_HOST 		= 3,
+	ETAG     		= 4,
+	IF_NONE_MATCH 	= 5,
+	URI_PORT 		= 7,
+	LOCATION_PATH 	= 8,
+	URI_PATH 		= 11,
+	CONTENT_FORMAT 	= 12,
+	MAX_AGE 		= 14,
+	URI_QUERY 		= 15,
+	ACCEPT 			= 17,
+	LOCATION_QUERY 	= 20,
+	PROXY_URI 		= 35,
+	PROXY_SCHEME 	= 39,
+	SIZE_1 			= 60
+};
+
+using media_type_t = 
+enum {
+	TEXT_PLAIN 		= 0,
+	LINK_FORMAT 	= 40,
+	XML 			= 41,
+	OCTET_STREAM 	= 42,
+	EXI 			= 47,
+	JSON 			= 50
+};
 
 class packet;
 
 class packetDestroyer {
 private:
-	packet * instanceP;
+	packet * _instanceP;
 
 public:
 	~packetDestroyer();
@@ -86,13 +116,15 @@ class packet {
 
 protected:
 	packet();
-	~packet(){}
-
+	~packet();
+	
 	friend class packetDestroyer;
 
 private:
-	static packet * instanceP;
-	static packetDestroyer destroyer;
+	static packet * _instanceP;
+	static packetDestroyer _destroyer;
+
+	error * _error;
 
 	using option_t = 
 	struct {
@@ -137,7 +169,7 @@ private:
 		const std::uint8_t payloadMarker = 0xFF;
 		std::vector <uint8_t> payload;
 	};
-	message_t message;
+	message_t _message;
 
 public:
 
@@ -146,55 +178,55 @@ public:
 
 	void set_message_headerInfo(std::uint8_t headerInfo)
 	{
-		message.headerInfo.asByte = headerInfo;
+		_message.headerInfo.asByte = headerInfo;
 	}
 	void set_message_version(std::uint8_t version)
 	{
-		message.headerInfo.asBitfield.version = version;
+		_message.headerInfo.asBitfield.version = version;
 	}
 	void set_message_type(std::uint8_t type)
 	{
-		message.headerInfo.asBitfield.type = type;
+		_message.headerInfo.asBitfield.type = type;
 	}
 	void set_message_tokenLength(std::uint8_t tokenLength)
 	{
-		message.headerInfo.asBitfield.tokenLength = tokenLength;
+		_message.headerInfo.asBitfield.tokenLength = tokenLength;
 	}
 	void set_message_code(std::uint8_t code)
 	{
-		message.code.asByte = code;
+		_message.code.asByte = code;
 	}
 	void set_message_codeClass(std::uint8_t codeClass)
 	{
-		message.code.asBitfield.codeClass = codeClass;
+		_message.code.asBitfield.codeClass = codeClass;
 	}
 	void set_message_codeDetail(std::uint8_t codeDetail)
 	{
-		message.code.asBitfield.codeDetail = codeDetail;
+		_message.code.asBitfield.codeDetail = codeDetail;
 	}
-	void set_message_messageId(std::uint8_t messageId)
+	void set_message_messageId(std::uint16_t messageId)
 	{
-		message.messageId = messageId;
+		_message.messageId = messageId;
 	}
 	std::uint8_t get_message_headerInfo() const
 	{
-		return message.headerInfo.asByte;
+		return _message.headerInfo.asByte;
 	}		
 	std::uint8_t get_message_code() const
 	{
-		return message.code.asByte;
+		return _message.code.asByte;
 	}
 	std::uint16_t get_message_messageId() const
 	{
-		return message.messageId;
+		return _message.messageId;
 	}
 	std::vector <uint8_t> get_message_token() const
 	{
-		return message.token;
+		return _message.token;
 	}
 	std::vector <uint8_t> get_message_payload() const
 	{
-		return message.payload;
+		return _message.payload;
 	}
 	static packet & createInstance();
 	static bool clearInstance(packet &);

@@ -12,10 +12,14 @@ int main()
 	
 		static packet & instance = new_packet();
 	
-		instance.set_message_version(0x3);
-		instance.set_message_type(0x3);
-		instance.set_message_tokenLength(1);
-		//instance.set_message_headerInfo(0x43);
+		instance.set_message_version(COAP_VERSION);
+		instance.set_message_type(NON_CONFIRMABLE);
+		instance.set_message_tokenLength(4);
+		instance.set_message_code(GET);
+		instance.set_message_messageId(1);
+		
+
+
 
 		std::uint8_t tmp = instance.get_message_headerInfo();
 

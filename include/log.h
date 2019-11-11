@@ -70,7 +70,7 @@ std::ostream & operator<<(std::ostream & os,const std::vector<T> &v)
 	\class log
 	\brief A simple logging system
 	\details This class implements the logging system
-	which has five levels of logging. Each level can be disabled or 
+	which has five levels of logging. Each level can be disabled or
 	enabled regardless of others.
 */
 class log {
@@ -80,11 +80,11 @@ private:
 		\brief Check if a level is printable
 		\param [in] level logging level
 		\return true if it is printable level
-				false otherwise 
+				false otherwise
 	*/
 	bool is_printable_level(level_t level)
 	{
-		return level > NONE && level <= CRITICAL;  
+		return level > NONE && level <= CRITICAL;
 	}
 
 	const std::vector<std::string> printableLevel = {
@@ -120,13 +120,13 @@ private:
 		\param [in] function  name of the function in which is called a logging function
 		\param [in] line  line of a code string for logging
 		\return true if header is printed
-				false if logging level is not enabled, so header is not printed 
+				false if logging level is not enabled, so header is not printed
 	*/
 	bool print_header(level_t level, const char * file, const char * func, int line)
 	{
 		assert(is_printable_level(level));
-		if (((1 << level) & _loggingLevels) == 0) return false;		
-#ifdef LOG_PRINT_LEVEL		
+		if (((1 << level) & _loggingLevels) == 0) return false;
+#ifdef LOG_PRINT_LEVEL
 		*_stream << "[" << printableLevel[level] << "] ";
 #else
 		LOG_UNUSED_PARAMETER(level);
@@ -135,20 +135,20 @@ private:
 		std::chrono::time_point<std::chrono::system_clock> now;
 		now = std::chrono::system_clock::now();
 		std::time_t now_c = std::chrono::system_clock::to_time_t(now);
-#ifdef LOG_PRINT_DATE		
-		*_stream << std::put_time(std::localtime(&now_c), "%F %T"); 
+#ifdef LOG_PRINT_DATE
+		*_stream << std::put_time(std::localtime(&now_c), "%F %T");
 #else
 		*_stream << std::put_time(std::localtime(&now_c), "%T");
 #endif
-#endif		
+#endif
 		*_stream << " >| " << "[";
-#ifdef LOG_PRINT_FILE_NAME	
+#ifdef LOG_PRINT_FILE_NAME
 		*_stream << file;
 		*_stream << ":";
 #else
 		LOG_UNUSED_PARAMETER(file);
 #endif
-#ifdef LOG_PRINT_FUNCTION_NAME	
+#ifdef LOG_PRINT_FUNCTION_NAME
 		*_stream  << func;
 		*_stream << ":";
 #else
@@ -160,13 +160,13 @@ private:
 		LOG_UNUSED_PARAMETER(line);
 #endif
 		*_stream	<< "] ";
-		return true;	 
+		return true;
 	}
 
 public:
 	log() = delete;/// default constructor is not permitted
 	log(const log &) = delete; /// copy constructor is not permitted
-	log & operator=(const log &) = delete; /// overloaded copy operator is not permitted 
+	log & operator=(const log &) = delete; /// overloaded copy operator is not permitted
 	/**
 		\brief Static function to create single instance of class
 		\param [in] loggingLevels bitmap of enabled logging levels
@@ -197,7 +197,7 @@ public:
 	{
 		assert((level <= CRITICAL && level >= NONE) || level == ALL);
 		if (ALL == level || NONE == level)
-		{		
+		{
 			_loggingLevels = level;
 		}
 		else _loggingLevels |= (1 << level);
@@ -209,7 +209,7 @@ public:
 		if (NONE == level)
 			_loggingLevels = ALL;
 		else if (ALL == level)
-			_loggingLevels = NONE; 
+			_loggingLevels = NONE;
 		else _loggingLevels &= ~(1 << level);
 	}
 
@@ -219,7 +219,7 @@ public:
 	}
 
 	template <typename T>
-	void print(level_t level, const char * file, const char * func, int line, T t) 
+	void print(level_t level, const char * file, const char * func, int line, T &t)
 	{
 		if(_print_header) {
 			if (!print_header(level, file, func, line)) return;
@@ -232,7 +232,7 @@ public:
 	}
 
 	template <typename T, typename... Args>
-	void print(level_t level, const char * file, const char * func, int line, T t, Args... args)
+	void print(level_t level, const char * file, const char * func, int line, T &t, Args... args)
 	{
 		if(_print_header) {
 			if (!print_header(level, file, func, line)) return;

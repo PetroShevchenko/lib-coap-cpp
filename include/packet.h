@@ -13,15 +13,15 @@ enum {
 	PACKET_MIN_LENGTH = 4
 };
 
-using message_type_t = 
+using message_type_t =
 enum {
 	CONFIRMABLE 	= 0x0,
 	NON_CONFIRMABLE = 0x1,
 	ACKNOWLEDGEMENT = 0x2,
 	RESET 			= 0x3
-};	
+};
 
-using message_code_class_t = 
+using message_code_class_t =
 enum {
 	METHOD 			= (0x0 << 5),
 	SUCCESS 		= (0x2 << 5),
@@ -30,7 +30,7 @@ enum {
 	SIGNALING_CODES = (0x7 << 5)
 };
 
-using message_code_t = 
+using message_code_t =
 enum {
 	EMPTY 	= METHOD | 0x0,
 	GET 	= METHOD | 0x1,
@@ -67,12 +67,12 @@ enum {
 	UNASSIGNED 	= SIGNALING_CODES  | 0x0,
 	CSM		 	= SIGNALING_CODES  | 0x1,
 	PING 		= SIGNALING_CODES  | 0x2,
-	PONG 		= SIGNALING_CODES  | 0x3,	
-	RELEASE		= SIGNALING_CODES  | 0x4,	
+	PONG 		= SIGNALING_CODES  | 0x3,
+	RELEASE		= SIGNALING_CODES  | 0x4,
 	ABORT 		= SIGNALING_CODES  | 0x5
 };
 
-using option_number_t = 
+using option_number_t =
 enum {
 	IF_MATCH 		= 0,
 	URI_HOST 		= 3,
@@ -91,7 +91,7 @@ enum {
 	SIZE_1 			= 60
 };
 
-using media_type_t = 
+using media_type_t =
 enum {
 	TEXT_PLAIN 		= 0,
 	LINK_FORMAT 	= 40,
@@ -117,7 +117,7 @@ class packet {
 protected:
 	packet();
 	~packet();
-	
+
 	friend class packetDestroyer;
 
 private:
@@ -126,7 +126,7 @@ private:
 
 	error * _error;
 
-	using option_t = 
+	using option_t =
 	struct {
 		union {
 			std::uint8_t asByte;
@@ -137,32 +137,36 @@ private:
 			} asBitfield;
 			#pragma pack(pop)
 		} header;
-		std::uint8_t * value;
+		std::vector<std::uint8_t> value;
 	};
 
-	using message_t = 
-	struct {
-		union {
-			std::uint8_t asByte;
-			#pragma pack(push,1)
-			struct {
-				std::uint8_t version: 2;
-				std::uint8_t type: 2;
-				std::uint8_t tokenLength: 4;
-			} asBitfield;
-			#pragma pack(pop)
-		} headerInfo;
-		
-		union {
-			std::uint8_t asByte;
-			#pragma pack(push,1)
-			struct {
-				std::uint8_t codeClass: 3;
-				std::uint8_t codeDetail: 5;
-			} asBitfield;
-			#pragma pack(pop)
-		} code;
+	using header_t =
+	union {
+		std::uint8_t asByte;
+		#pragma pack(push,1)
+		struct {
+			std::uint8_t version: 2;
+			std::uint8_t type: 2;
+			std::uint8_t tokenLength: 4;
+		} asBitfield;
+		#pragma pack(pop)
+	};
 
+	using code_t =
+	union {
+		std::uint8_t asByte;
+		#pragma pack(push,1)
+		struct {
+			std::uint8_t codeClass: 3;
+			std::uint8_t codeDetail: 5;
+		} asBitfield;
+		#pragma pack(pop)
+	};
+
+	using message_t =
+	struct {
+		header_t headerInfo;
+		code_t code;
 		std::uint16_t messageId;
 		std::vector <uint8_t> token;
 		std::vector <option_t> options;
@@ -175,7 +179,12 @@ public:
 
 	packet(const packet &) = delete;
 	packet & operator=(const packet &) = delete;
-	~packet();
+
+	friend std::ostream & operator<<(std::ostream & os,const option_t &option);
+	friend std::ostream & operator<<(std::ostream & os,const header_t &header);
+	friend std::ostream & operator<<(std::ostream & os,const code_t &code);
+	friend std::ostream & operator<<(std::ostream & os,const message_t &message);
+	friend std::ostream & operator<<(std::ostream & os,const packet &object);
 
 	void set_message_headerInfo(std::uint8_t headerInfo)
 	{
@@ -212,7 +221,7 @@ public:
 	std::uint8_t get_message_headerInfo() const
 	{
 		return _message.headerInfo.asByte;
-	}		
+	}
 	std::uint8_t get_message_code() const
 	{
 		return _message.code.asByte;
@@ -233,8 +242,8 @@ public:
 	static bool clearInstance(packet &);
 };
 
-#define new_packet() packet::createInstance() 
-#define delete_packet(instance) packet::clearInstance(instance) 
+#define new_packet() packet::createInstance()
+#define delete_packet(instance) packet::clearInstance(instance)
 
 }//coap
 

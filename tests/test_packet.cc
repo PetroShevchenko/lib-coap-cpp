@@ -9,6 +9,8 @@ int main()
 	LOG_SET_LEVEL(DEBUG);
 
 	try {
+		LOG_INIT(NONE, std::clog);
+		LOG_SET_LEVEL(DEBUG);
 
 		static packet & instance = new_packet();
 
@@ -21,9 +23,8 @@ int main()
 
 		std::uint8_t tmp = instance.get_message_headerInfo();
 
-		LOG_SET_STREAM_FORMAT(std::ios::hex, std::ios::basefield);
+		//LOG_SET_STREAM_FORMAT(std::ios::hex, std::ios::basefield);
 		LOG(DEBUG, instance);
-		//std::cout << instance;
 
 		if (!delete_packet(instance))
 			LOG(DEBUG, "Packet was not deleted");

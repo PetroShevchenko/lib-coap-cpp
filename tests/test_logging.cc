@@ -19,7 +19,7 @@ int main()
 	LOG(DEBUG, 10000, "\t",3.14, " test");
 	LOG(WARNING, "it is warning");
 	LOG(ERROR, " it is error");
-	LOG_SET_STREAM_FORMAT(std::ios::hex, std::ios::basefield);
+	//LOG_SET_STREAM_FORMAT(std::ios::hex, std::ios::basefield);
 	LOG(DEBUG,"logging levels: 0x", static_cast<unsigned short>(loggingLevels));
 	file.close();
 

@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include <iostream>
+//#include <arpa/inet.h>
 #include "log.h"
 #include "error.h"
 
@@ -10,7 +11,9 @@ namespace coap {
 
 enum {
 	COAP_VERSION = 0x1,
-	PACKET_MIN_LENGTH = 4
+	PACKET_HEADER_SIZE = 4,
+	PACKET_MIN_LENGTH = PACKET_HEADER_SIZE,
+	TOKEN_MAX_LENGTH = 8
 };
 
 using message_type_t =
@@ -121,10 +124,12 @@ protected:
 	friend class packetDestroyer;
 
 private:
+	LOG_INIT(NONE, std::clog);
 	static packet * _instanceP;
 	static packetDestroyer _destroyer;
 
 	error * _error;
+	bool _is_little_endian;
 
 	using option_t =
 	struct {
@@ -168,12 +173,17 @@ private:
 		header_t headerInfo;
 		code_t code;
 		std::uint16_t messageId;
-		std::vector <uint8_t> token;
+		std::uint8_t token[TOKEN_MAX_LENGTH];
 		std::vector <option_t> options;
 		const std::uint8_t payloadMarker = 0xFF;
 		std::vector <uint8_t> payload;
 	};
 	message_t _message;
+
+	bool parse_header(const std::uint8_t * buffer, const size_t length);
+	bool parse_token(const std::uint8_t * buffer, const size_t length);
+	bool parse_options(const std::uint8_t * buffer, const size_t length);
+	bool parse_payload(const std::uint8_t * buffer, const size_t length);
 
 public:
 
@@ -185,6 +195,20 @@ public:
 	friend std::ostream & operator<<(std::ostream & os,const code_t &code);
 	friend std::ostream & operator<<(std::ostream & os,const message_t &message);
 	friend std::ostream & operator<<(std::ostream & os,const packet &object);
+
+	static bool is_little_endian_byte_order()
+	{
+		const uint16_t test = 0x005A;
+		//test = htons(test);
+		return (test & 0xFF) == 0x5A ? true : false;
+	}
+
+	bool get_is_little_endian() const
+	{
+		return _is_little_endian;
+	}
+
+	bool parse(const std::uint8_t * buffer, const size_t length);
 
 	void set_message_headerInfo(std::uint8_t headerInfo)
 	{
@@ -222,6 +246,14 @@ public:
 	{
 		return _message.headerInfo.asByte;
 	}
+	std::uint8_t get_message_tokenLength() const
+	{
+		return _message.headerInfo.asBitfield.tokenLength;
+	}
+	std::uint8_t get_message_version() const
+	{
+		return _message.headerInfo.asBitfield.version;
+	}	
 	std::uint8_t get_message_code() const
 	{
 		return _message.code.asByte;
@@ -230,7 +262,7 @@ public:
 	{
 		return _message.messageId;
 	}
-	std::vector <uint8_t> get_message_token() const
+	std::uint8_t * get_message_token()
 	{
 		return _message.token;
 	}

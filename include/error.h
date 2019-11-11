@@ -1,5 +1,6 @@
 #ifndef ERROR_H
 #define ERROR_H
+#include <iostream>
 
 namespace coap {
 
@@ -8,6 +9,8 @@ enum
 {
 	OK = 0,
 	WRONG_ARGUMENT,
+	PROTOCOL_VERSION,
+	TOKEN_LENGTH,
 	UNKNOWN
 };
 #define ERROR_CODE_MIN OK
@@ -23,6 +26,8 @@ protected:
 	const std::vector <std::string> _message = {
 		"Success",
 		"Wrong a function argument",
+		"That CoAP version is not supported",
+		"Wrong the token length",
 		"Unknown error"
 	};
 
@@ -32,6 +37,12 @@ public:
 
 	error():_code(UNKNOWN){}
 	~error(){}
+
+	friend std::ostream & operator<<(std::ostream &os, const error & er)
+	{
+		os << "code: " << er.get_code() << " message : " << er.get_message();
+		return os;
+	}
 
 	void set_code(const int code)
 	{

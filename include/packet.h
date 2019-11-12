@@ -124,7 +124,7 @@ protected:
 	friend class packetDestroyer;
 
 private:
-	LOG_INIT(NONE, std::clog);
+	LOG_INIT(NONE);
 	static packet * _instanceP;
 	static packetDestroyer _destroyer;
 
@@ -253,7 +253,7 @@ public:
 	std::uint8_t get_message_version() const
 	{
 		return _message.headerInfo.asBitfield.version;
-	}	
+	}
 	std::uint8_t get_message_code() const
 	{
 		return _message.code.asByte;

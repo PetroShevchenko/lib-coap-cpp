@@ -11,52 +11,30 @@ packetDestroyer packet::_destroyer;
 
 packet & packet::createInstance()
 {
-	LOG_INIT(NONE, std::clog);
-	//LOG_SET_LEVEL(DEBUG);
-
-	LOG(DEBUG,"Entering");
 	if (!_instanceP) {
-		LOG(DEBUG,"Create a new packet");
 		_instanceP = new packet();
-		//LOG_SET_STREAM_FORMAT(std::ios::hex, std::ios::basefield);
-		LOG(DEBUG,"A new packet was created, instanceP = ",_instanceP);
 		_destroyer.initialize(_instanceP);
-		LOG(DEBUG,"Exit");
 	}
-	LOG(DEBUG,"Exit");
 	return *_instanceP;
 }
 
 bool packet::clearInstance(packet & instance)
 {
-	LOG_INIT(NONE, std::clog);
-	//LOG_SET_LEVEL(DEBUG);
-
-	LOG(DEBUG,"Entering");
-
 	if (&instance != _instanceP) {
-		LOG(DEBUG,"Instances are not compared");
 		return false;
 	}
-	//TODO
-	//clear all fields of instance
+	//TODO: clear all fields of instance
 	_instanceP->_message.headerInfo.asByte = 0;
 	_instanceP->_message.code.asByte = 0;
 	_instanceP->_message.messageId = 0;
-	LOG(DEBUG,"Clearing a token");
 	std::memset(_instanceP->_message.token, 0, TOKEN_MAX_LENGTH);
-	LOG(DEBUG,"Clearing a payload");
 	_instanceP->_message.payload.clear();
-	//LOG(DEBUG,"token = ", instanceP->message.token);
-	//LOG(DEBUG,"payload = ", instanceP->message.payload);
-	LOG(DEBUG,"Exit");
 	return true;
 }
 
 packet::packet()
 {
-	LOG_INIT(NONE, std::clog);
-	//LOG_SET_LEVEL(DEBUG);
+	LOG_SET_LEVEL(DEBUG);
 	LOG(DEBUG,"Entering");
 
 	_message.headerInfo.asByte = 0;
@@ -122,14 +100,12 @@ std::ostream & operator<<(std::ostream & os,const packet::message_t &message)
 
 std::ostream & operator<<(std::ostream & os,const packet &object)
 {
-	os << *object._error << object._message;
-	//os << object._message;
+	os << object._message;
 	return os;
 }
 
 bool packet::parse_header(const std::uint8_t * buffer, const size_t length)
 {
-	LOG_INIT(NONE, std::clog);
 	LOG(DEBUG, "Entering");
 	if (length < PACKET_MIN_LENGTH) {
 		_error->set_code(WRONG_ARGUMENT);
@@ -155,7 +131,6 @@ bool packet::parse_header(const std::uint8_t * buffer, const size_t length)
 
 bool packet::parse_token(const std::uint8_t * buffer, const size_t length)
 {
-	LOG_INIT(NONE, std::clog);
 	std::memset(_message.token, 0, TOKEN_MAX_LENGTH);
 	if (0 == get_message_tokenLength()) {
 		LOG(DEBUG,"Token is not presented into the packet");

@@ -5,12 +5,10 @@ LOG_USING_NAMESPACE
 
 int main()
 {
-	LOG_INIT(NONE, std::clog);
+	LOG_INIT(NONE);
 	LOG_SET_LEVEL(DEBUG);
 
 	try {
-		LOG_INIT(NONE, std::clog);
-		LOG_SET_LEVEL(DEBUG);
 
 		static packet & instance = new_packet();
 
@@ -20,9 +18,7 @@ int main()
 		instance.set_message_code(GET);
 		instance.set_message_messageId(1);
 
-
-		std::uint8_t tmp = instance.get_message_headerInfo();
-
+		//std::uint8_t tmp = instance.get_message_headerInfo();
 		//LOG_SET_STREAM_FORMAT(std::ios::hex, std::ios::basefield);
 		LOG(DEBUG, instance);
 

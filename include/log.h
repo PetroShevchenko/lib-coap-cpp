@@ -9,7 +9,7 @@
 
 #ifndef LOG_ENABLE
 #define LOG_USING_NAMESPACE
-#define LOG_INIT(loggingLevels, outputStream)
+#define LOG_INIT(loggingLevels)
 #define LOG(level, ...)
 #define LOG_SET_STREAM(stream)
 #define LOG_SET_LEVEL(level)
@@ -29,7 +29,7 @@
 #include <iomanip>
 #endif
 #define LOG_USING_NAMESPACE using namespace coap;
-#define LOG_INIT(loggingLevels, outputStream) coap::log & instanceLink = coap::log::createInstance(loggingLevels, outputStream)
+#define LOG_INIT(loggingLevels) coap::log & instanceLink = coap::log::createInstance(loggingLevels)
 #define LOG(level, ...) instanceLink.print(level, __FILE__, __func__, __LINE__, __VA_ARGS__ )
 #define LOG_SET_STREAM(stream) instanceLink.set_stream(stream)
 #define LOG_SET_LEVEL(level) instanceLink.set_level(level)
@@ -173,9 +173,9 @@ public:
 		\param [in] outputStream  stream to output a log
 		\return link on a created class instance
 	*/
-	static log& createInstance(std::uint8_t loggingLevels, std::ostream &outputStream)
+	static log& createInstance(std::uint8_t loggingLevels)
 	{
-		static log instance(loggingLevels, outputStream);
+		static log instance(loggingLevels, std::clog);
 		return instance;
 	}
 	/**
@@ -216,6 +216,11 @@ public:
 	std::uint8_t get_loggingLevels() const
 	{
 		return _loggingLevels;
+	}
+
+	std::ostream * get_stream() const
+	{
+		return _stream;
 	}
 
 	template <typename T>

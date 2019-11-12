@@ -1,10 +1,11 @@
 #ifndef ERROR_H
 #define ERROR_H
 #include <iostream>
+#include <string>
 
 namespace coap {
 
-using error_code_t = 
+using error_code_t =
 enum
 {
 	OK = 0,
@@ -33,7 +34,7 @@ protected:
 
 public:
 	error(const error &) = delete; 				/// copy constructor is not permitted
-	error & operator=(const error &) = delete; 	/// overloaded copy operator is not permitted 
+	error & operator=(const error &) = delete; 	/// overloaded copy operator is not permitted
 
 	error():_code(UNKNOWN){}
 	~error(){}
@@ -49,7 +50,7 @@ public:
 		_code = code;
 	}
 
-	int get_code() const 
+	int get_code() const
 	{
 		return _code;
 	}

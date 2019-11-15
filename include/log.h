@@ -9,9 +9,9 @@
 
 #ifndef LOG_ENABLE
 #define LOG_USING_NAMESPACE
-#define LOG_INIT(loggingLevels)
+#define LOG_CREATE(loggingLevels, outputStream)
+#define LOG_DELETE
 #define LOG(level, ...)
-#define LOG_SET_STREAM(stream)
 #define LOG_SET_LEVEL(level)
 #define LOG_UNSET_LEVEL(level)
 #define LOG_GET_LEVELS(loggingLevels)
@@ -29,13 +29,13 @@
 #include <iomanip>
 #endif
 #define LOG_USING_NAMESPACE using namespace coap;
-#define LOG_INIT(loggingLevels) coap::log & instanceLink = coap::log::createInstance(loggingLevels)
-#define LOG(level, ...) instanceLink.print(level, __FILE__, __func__, __LINE__, __VA_ARGS__ )
-#define LOG_SET_STREAM(stream) instanceLink.set_stream(stream)
-#define LOG_SET_LEVEL(level) instanceLink.set_level(level)
-#define LOG_UNSET_LEVEL(level) instanceLink.unset_level(level)
-#define LOG_GET_LEVELS(loggingLevels) loggingLevels = instanceLink.get_loggingLevels()
-#define LOG_SET_STREAM_FORMAT(flags, mask) instanceLink.set_stream_format(flags, mask)
+#define LOG_CREATE(loggingLevels, outputStream) coap::log * instanceP = coap::log::createInstance(loggingLevels, outputStream)
+#define LOG_DELETE coap::log::deleteInstance(&instanceP)
+#define LOG(level, ...) instanceP->print(level, __FILE__, __func__, __LINE__, __VA_ARGS__ )
+#define LOG_SET_LEVEL(level) instanceP->set_level(level)
+#define LOG_UNSET_LEVEL(level) instanceP->unset_level(level)
+#define LOG_GET_LEVELS(loggingLevels) loggingLevels = instanceP->get_loggingLevels()
+#define LOG_SET_STREAM_FORMAT(flags, mask) instanceP->set_stream_format(flags, mask)
 #define LOG_UNUSED_PARAMETER(p) (void)(p)
 /*
 #define LOG_PRINT_TIMESTAMP
@@ -99,7 +99,7 @@ private:
 	std::uint8_t _loggingLevels; /// a bitmap that contained all of enabled levels
 	std::ostream * _stream;		/// stream to output log (for example: cout, cerr, clog , file)
 	bool _print_header;			/// flag to print a log header
-
+public:
 	/**
 		\brief Private constructor to create single instance
 		\param [in] loggingLevels bitmap of enabled logging levels
@@ -113,6 +113,8 @@ private:
 		_stream = &outputStream;
 		_print_header = true;
 	}
+	~log(){}
+private:
 	/**
 		\brief Function to print head informatin on the begin of the log
 		\param [in] level printable logging level
@@ -173,19 +175,18 @@ public:
 		\param [in] outputStream  stream to output a log
 		\return link on a created class instance
 	*/
-	static log& createInstance(std::uint8_t loggingLevels)
+
+	static log * createInstance(std::uint8_t loggingLevels, std::ostream & outputStream)
 	{
-		static log instance(loggingLevels, std::clog);
-		return instance;
+		return new log(loggingLevels, outputStream);
 	}
-	/**
-		\brief Setter to set a value of stream
-		\param [in] stream  stream to log
-		\return void
-	*/
-	void set_stream(std::ostream & stream)
+
+	static bool deleteInstance(log ** instanceP)
 	{
-		log::_stream = &stream;
+		if (instanceP == nullptr || *instanceP == nullptr) return false;		
+		delete *instanceP;
+		*instanceP = nullptr;
+		return true;
 	}
 
 	void set_stream_format(std::ios_base::fmtflags flags, std::ios_base::fmtflags mask)
@@ -216,11 +217,6 @@ public:
 	std::uint8_t get_loggingLevels() const
 	{
 		return _loggingLevels;
-	}
-
-	std::ostream * get_stream() const
-	{
-		return _stream;
 	}
 
 	template <typename T>

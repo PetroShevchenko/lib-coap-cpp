@@ -124,7 +124,8 @@ protected:
 	friend class packetDestroyer;
 
 private:
-	LOG_INIT(NONE);
+	LOG_CREATE(NONE,std::clog);
+
 	static packet * _instanceP;
 	static packetDestroyer _destroyer;
 

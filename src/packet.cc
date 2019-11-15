@@ -34,7 +34,7 @@ bool packet::clearInstance(packet & instance)
 
 packet::packet()
 {
-	LOG_SET_LEVEL(DEBUG);
+	LOG_SET_LEVEL(ALL);
 	LOG(DEBUG,"Entering");
 
 	_message.headerInfo.asByte = 0;
@@ -42,12 +42,14 @@ packet::packet()
 	_message.messageId = 0;
 	_error = new error;
 	_is_little_endian = is_little_endian_byte_order();
-	LOG(DEBUG,"Arhitecture of the CPU is (1 - Little Endian, 0 - Big Endian): ", _is_little_endian);
+	LOG(INFO,"Arhitecture of the CPU is (1 - Little Endian, 0 - Big Endian): ", _is_little_endian);
+	LOG(DEBUG,"Leaving");
 }
 
 packet::~packet()
 {
 	delete _error;
+	LOG_DELETE;
 }
 
 packetDestroyer::~packetDestroyer()

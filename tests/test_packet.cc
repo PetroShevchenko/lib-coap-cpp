@@ -5,7 +5,7 @@ LOG_USING_NAMESPACE
 
 int main()
 {
-	LOG_INIT(NONE);
+	LOG_CREATE(NONE, std::clog);
 	LOG_SET_LEVEL(DEBUG);
 
 	try {
@@ -18,6 +18,8 @@ int main()
 		instance.set_message_code(GET);
 		instance.set_message_messageId(1);
 
+		//std::cout << __func__<< __FILE__ << std::endl;
+
 		//std::uint8_t tmp = instance.get_message_headerInfo();
 		//LOG_SET_STREAM_FORMAT(std::ios::hex, std::ios::basefield);
 		LOG(DEBUG, instance);
@@ -28,8 +30,9 @@ int main()
 	catch(...)
 	{
 		LOG(DEBUG,"It was cought an exception");
+		LOG_DELETE;
 		exit(1);
 	}
-
+	LOG_DELETE;
 	return 0;
 }

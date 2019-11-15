@@ -75,6 +75,13 @@ enum {
 	ABORT 		= SIGNALING_CODES  | 0x5
 };
 
+using option_delta_t =
+enum {
+	MINUS_THIRTEEN = 13,
+	MINUS_TWO_HUNDRED_SIXTY_NINE = 14,
+	RESERVED_FOR_FUTURE = 15
+};
+
 using option_number_t =
 enum {
 	IF_MATCH 		= 0,
@@ -143,6 +150,7 @@ private:
 			} asBitfield;
 			#pragma pack(pop)
 		} header;
+		std::uint8_t number;
 		std::vector<std::uint8_t> value;
 	};
 

@@ -12,6 +12,8 @@ enum
 	WRONG_ARGUMENT,
 	PROTOCOL_VERSION,
 	TOKEN_LENGTH,
+	WRONG_OPTION_DELTA,
+	WRONG_OPTION_LENGTH,
 	UNKNOWN
 };
 #define ERROR_CODE_MIN OK
@@ -29,6 +31,8 @@ protected:
 		"Wrong a function argument",
 		"That CoAP version is not supported",
 		"Wrong the token length",
+		"Wrong the delta of the option"
+		"Wrong the length of the option"
 		"Unknown error"
 	};
 

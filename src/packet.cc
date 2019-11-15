@@ -1,5 +1,6 @@
 #include "packet.h"
 #include "log.h"
+#include "error.h"
 #include <cstring>
 
 LOG_USING_NAMESPACE
@@ -150,8 +151,84 @@ bool packet::parse_token(const std::uint8_t * buffer, const size_t length)
 
 bool packet::parse_options(const std::uint8_t * buffer, const size_t length)
 {
-	//TODO
+	const std::uint8_t * startOptions = buffer + PACKET_HEADER_SIZE + _message.headerInfo.asBitfield.tokenLength;
+	const size_t optionsOffset = static_cast<size_t>(startOptions - buffer);
+	option_t opt = {0};
+	size_t optHeaderLength = 0;
+	uint16_t optDelta = 0;
+	uint16_t optLength = 0;
+
+	for(size_t i = optionsOffset; i < length; i++)
+	{
+		opt.header.asByte = buffer[i];
+		//optHeaderLength = sizeof(std::uint8_t);
+		optLength = 0;
+
+		auto option_parser = [&](std::uint8_t parsed, std::uint16_t * modified )->bool
+		{
+			switch(parsed)
+			{
+				case MINUS_THIRTEEN:
+				{
+					//optHeaderLength += sizeof(std::uint8_t);
+					*modified += buffer[i + 1] + MINUS_THIRTEEN;
+					i += sizeof(std::uint8_t);
+					break;
+				}
+				case MINUS_TWO_HUNDRED_SIXTY_NINE:
+				{
+					//optHeaderLength += sizeof(std::uint16_t);
+					if (get_is_little_endian())
+					{
+						*modified += buffer[i + 1] | (buffer[i + 2] << 8);
+					}
+					else {
+						*modified += buffer[i + 2] | (buffer[i + 1] << 8);
+					}
+					*modified += MINUS_TWO_HUNDRED_SIXTY_NINE;
+					i += sizeof(std::uint16_t);
+					break;
+				}
+				case RESERVED_FOR_FUTURE:
+				{
+					return false;
+				}
+				default:
+					break;
+			}
+			return true;
+		};
+
+		if ( !option_parser (opt.header.asBitfield.delta, &optDelta) ) {
+			_error->set_code(WRONG_OPTION_DELTA);
+			LOG(ERROR,"Delta of option which equals 15 is reserved for the future");
+			return false;
+		}
+
+		if ( !option_parser (opt.header.asBitfield.delta, &optLength) ) {
+			_error->set_code(WRONG_OPTION_LENGTH);
+			LOG(ERROR,"Length of option which equals 15 is reserved for the future");
+			return false;
+		}
+
+		i++;
+
+		if ((buffer + i + optLength) > (buffer + length)) {
+			_error->set_code(WRONG_OPTION_LENGTH);
+			LOG(ERROR,"Length of option is too long");
+			return false;
+		}
+
+		opt.number = optDelta;
+		opt.value.resize(optLength);
+		int j = 0;
+		while(j++ < optLength) opt.value.push_back(*(buffer + i + j));
+		_message.options.push_back(opt);
+		opt = {0};
+	}
+	return true;
 }
+
 bool packet::parse_payload(const std::uint8_t * buffer, const size_t length)
 {
 	//TODO

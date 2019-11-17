@@ -31,8 +31,8 @@ protected:
 		"Wrong a function argument",
 		"That CoAP version is not supported",
 		"Wrong the token length",
-		"Wrong the delta of the option"
-		"Wrong the length of the option"
+		"Wrong the option parameter delta",
+		"Wrong the option parameter length",
 		"Unknown error"
 	};
 

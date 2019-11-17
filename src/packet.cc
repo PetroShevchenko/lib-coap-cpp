@@ -68,8 +68,10 @@ std::ostream & operator<<(std::ostream & os,const packet::option_t &option)
 	os << "option #" << ++optionsCounter <<
 		" delta: " << static_cast<unsigned short>(option.header.asBitfield.delta) <<
 		" length: " << static_cast<unsigned short>(option.header.asBitfield.length) <<
-		" value: " << option.value
-		;
+		" number: " << static_cast<unsigned short>(option.number) <<
+		" value: ";
+	for(auto v:option.value)
+		os << static_cast<int>(v) << " ";
 	return os;
 }
 
@@ -94,10 +96,20 @@ std::ostream & operator<<(std::ostream & os,const packet::message_t &message)
 {
 	os << message.headerInfo << message.code <<
 		" messageId: " << message.messageId <<
-		" token: " << message.token <<
+		" token: ";
+
+	for(auto i : message.token)
+		os << static_cast<int>(i) << " ";
+
+	os <<
 		" options: " << message.options <<
-		" payload: " << message.payload
-		;
+		" \npayloadOffset: " << message.payloadOffset <<
+		" \npayload: \n";
+
+	for(auto i : message.payload)
+		os << static_cast<int>(i) << " ";
+	os <<
+		" \npayload length: " << message.payload.size();
 	return os;
 }
 
@@ -116,6 +128,12 @@ bool packet::parse_header(const std::uint8_t * buffer, const size_t length)
 		return false;
 	}
 	set_message_headerInfo(buffer[0]);
+	LOG_SET_STREAM_FORMAT(std::ios::hex, std::ios::basefield);
+	LOG(DEBUG,"buffer[0]=",static_cast<int>(buffer[0]));
+	LOG(DEBUG,"get_message_version() =",static_cast<int>(get_message_version()));
+	LOG(DEBUG,"get_message_type() =",static_cast<int>(get_message_type()));
+	LOG(DEBUG,"get_message_tokenLength() =",static_cast<int>(get_message_tokenLength()));
+
 	if (COAP_VERSION != get_message_version()) {
 		_error->set_code(PROTOCOL_VERSION);
 		LOG(ERROR, _error->get_message());
@@ -153,61 +171,53 @@ bool packet::parse_options(const std::uint8_t * buffer, const size_t length)
 {
 	const std::uint8_t * startOptions = buffer + PACKET_HEADER_SIZE + _message.headerInfo.asBitfield.tokenLength;
 	const size_t optionsOffset = static_cast<size_t>(startOptions - buffer);
+	size_t i = 0;
 	option_t opt = {0};
-	size_t optHeaderLength = 0;
 	uint16_t optDelta = 0;
 	uint16_t optLength = 0;
+	LOG(DEBUG,"optionsOffset = ", optionsOffset);
 
-	for(size_t i = optionsOffset; i < length; i++)
+	for (i = optionsOffset; buffer[i] != _message.payloadMarker && i < length; i += optLength)
 	{
 		opt.header.asByte = buffer[i];
-		//optHeaderLength = sizeof(std::uint8_t);
-		optLength = 0;
+		optDelta = opt.header.asBitfield.delta ;
+		optLength = opt.header.asBitfield.length;
 
-		auto option_parser = [&](std::uint8_t parsed, std::uint16_t * modified )->bool
+		LOG(DEBUG,"opt.header.asBitfield.delta = ", static_cast<int>(opt.header.asBitfield.delta));
+		LOG(DEBUG,"opt.header.asBitfield.length = ", static_cast<int>(opt.header.asBitfield.length));
+
+		auto option_parser = [&](std::uint8_t parsing, std::uint16_t * modifying )->bool
 		{
-			switch(parsed)
-			{
-				case MINUS_THIRTEEN:
-				{
-					//optHeaderLength += sizeof(std::uint8_t);
-					*modified += buffer[i + 1] + MINUS_THIRTEEN;
-					i += sizeof(std::uint8_t);
-					break;
-				}
-				case MINUS_TWO_HUNDRED_SIXTY_NINE:
-				{
-					//optHeaderLength += sizeof(std::uint16_t);
-					if (get_is_little_endian())
-					{
-						*modified += buffer[i + 1] | (buffer[i + 2] << 8);
-					}
-					else {
-						*modified += buffer[i + 2] | (buffer[i + 1] << 8);
-					}
-					*modified += MINUS_TWO_HUNDRED_SIXTY_NINE;
-					i += sizeof(std::uint16_t);
-					break;
-				}
-				case RESERVED_FOR_FUTURE:
-				{
-					return false;
-				}
-				default:
-					break;
+			if (parsing == MINUS_THIRTEEN) {
+				if (i + 1 > length) return false;
+				*modifying = buffer[i + 1] + MINUS_THIRTEEN_OPT_VALUE;
+				i += sizeof(std::uint8_t);
 			}
+			else if (parsing == MINUS_TWO_HUNDRED_SIXTY_NINE) {
+				if (i + 2 > length) return false;
+				if (get_is_little_endian())
+				{
+					*modifying = buffer[i + 1] | (buffer[i + 2] << 8);
+				}
+				else {
+					*modifying = buffer[i + 2] | (buffer[i + 1] << 8);
+				}
+				*modifying += MINUS_TWO_HUNDRED_SIXTY_NINE_OPT_VALUE;
+				i += sizeof(std::uint16_t);			
+			}
+			else if (parsing == RESERVED_FOR_FUTURE) return false;
 			return true;
 		};
 
 		if ( !option_parser (opt.header.asBitfield.delta, &optDelta) ) {
 			_error->set_code(WRONG_OPTION_DELTA);
-			LOG(ERROR,"Delta of option which equals 15 is reserved for the future");
+			LOG(ERROR, _error->get_message());
 			return false;
 		}
 
-		if ( !option_parser (opt.header.asBitfield.delta, &optLength) ) {
+		if ( !option_parser (opt.header.asBitfield.length, &optLength) ) {
 			_error->set_code(WRONG_OPTION_LENGTH);
-			LOG(ERROR,"Length of option which equals 15 is reserved for the future");
+			LOG(ERROR, _error->get_message());
 			return false;
 		}
 
@@ -220,22 +230,34 @@ bool packet::parse_options(const std::uint8_t * buffer, const size_t length)
 		}
 
 		opt.number = optDelta;
-		opt.value.resize(optLength);
-		int j = 0;
-		while(j++ < optLength) opt.value.push_back(*(buffer + i + j));
+
+		LOG(DEBUG,"optLength = ", optLength);
+		for (int j = 0; j < optLength; j++)
+		{
+			LOG(DEBUG,"buffer[i + j] = ", static_cast<int>(buffer[i + j]));
+			opt.value.push_back( buffer[i + j] );
+		}
+
 		_message.options.push_back(opt);
 		opt = {0};
 	}
+	_message.payloadOffset = i + sizeof(_message.payloadMarker);
 	return true;
 }
 
 bool packet::parse_payload(const std::uint8_t * buffer, const size_t length)
 {
-	//TODO
+	const size_t maxPayloadOffset = length - _message.payloadOffset;
+	for (size_t i = 0; i < maxPayloadOffset; i++)
+		_message.payload.push_back(buffer[_message.payloadOffset + i]);
+	return true;
 }
+
 bool packet::parse(const std::uint8_t * buffer, const size_t length)
 {
 	bool returnCode = false;
+	assert(buffer != nullptr);
+	assert(length != 0);
 	returnCode = parse_header(buffer, length);
 	if (!returnCode) return returnCode;
 	returnCode = parse_token(buffer, length);

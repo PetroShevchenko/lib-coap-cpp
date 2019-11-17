@@ -13,7 +13,9 @@ enum {
 	COAP_VERSION = 0x1,
 	PACKET_HEADER_SIZE = 4,
 	PACKET_MIN_LENGTH = PACKET_HEADER_SIZE,
-	TOKEN_MAX_LENGTH = 8
+	TOKEN_MAX_LENGTH = 8,
+	MINUS_THIRTEEN_OPT_VALUE = 13,
+	MINUS_TWO_HUNDRED_SIXTY_NINE_OPT_VALUE = 269
 };
 
 using message_type_t =
@@ -145,8 +147,8 @@ private:
 			std::uint8_t asByte;
 			#pragma pack(push,1)
 			struct {
-				std::uint8_t delta : 4;
 				std::uint8_t length : 4;
+				std::uint8_t delta : 4;
 			} asBitfield;
 			#pragma pack(pop)
 		} header;
@@ -159,9 +161,9 @@ private:
 		std::uint8_t asByte;
 		#pragma pack(push,1)
 		struct {
-			std::uint8_t version: 2;
-			std::uint8_t type: 2;
 			std::uint8_t tokenLength: 4;
+			std::uint8_t type: 2;
+			std::uint8_t version: 2;
 		} asBitfield;
 		#pragma pack(pop)
 	};
@@ -171,8 +173,8 @@ private:
 		std::uint8_t asByte;
 		#pragma pack(push,1)
 		struct {
-			std::uint8_t codeClass: 3;
 			std::uint8_t codeDetail: 5;
+			std::uint8_t codeClass: 3;
 		} asBitfield;
 		#pragma pack(pop)
 	};
@@ -185,8 +187,10 @@ private:
 		std::uint8_t token[TOKEN_MAX_LENGTH];
 		std::vector <option_t> options;
 		const std::uint8_t payloadMarker = 0xFF;
+		size_t payloadOffset;
 		std::vector <uint8_t> payload;
 	};
+public:
 	message_t _message;
 
 	bool parse_header(const std::uint8_t * buffer, const size_t length);
@@ -199,6 +203,8 @@ public:
 	packet(const packet &) = delete;
 	packet & operator=(const packet &) = delete;
 
+	bool parse(const std::uint8_t * buffer, const size_t length);
+
 	friend std::ostream & operator<<(std::ostream & os,const option_t &option);
 	friend std::ostream & operator<<(std::ostream & os,const header_t &header);
 	friend std::ostream & operator<<(std::ostream & os,const code_t &code);
@@ -209,15 +215,14 @@ public:
 	{
 		const uint16_t test = 0x005A;
 		//test = htons(test);
-		return (test & 0xFF) == 0x5A ? true : false;
+		//return (test & 0xFF) == 0x5A ? true : false;
+		return false;
 	}
 
 	bool get_is_little_endian() const
 	{
 		return _is_little_endian;
 	}
-
-	bool parse(const std::uint8_t * buffer, const size_t length);
 
 	void set_message_headerInfo(std::uint8_t headerInfo)
 	{
@@ -251,6 +256,7 @@ public:
 	{
 		_message.messageId = messageId;
 	}
+
 	std::uint8_t get_message_headerInfo() const
 	{
 		return _message.headerInfo.asByte;
@@ -270,6 +276,10 @@ public:
 	std::uint16_t get_message_messageId() const
 	{
 		return _message.messageId;
+	}
+	std::uint8_t get_message_type() const
+	{
+		return _message.headerInfo.asBitfield.type;
 	}
 	std::uint8_t * get_message_token()
 	{

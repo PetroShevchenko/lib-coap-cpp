@@ -1,8 +1,9 @@
 cmake_minimum_required (VERSION 3.5)
 
-set(PROJECT_NAME "test_log")
-set(SRC_LIST tests/test_packet.cc
-				src/packet.cc)
+set(PROJECT_NAME "test_app")
+set(SRC_LIST tests/test_uri.cc
+				src/packet.cc
+				src/uri.cc)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)

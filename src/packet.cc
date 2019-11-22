@@ -3,12 +3,11 @@
 #include "error.h"
 #include <cstring>
 
-LOG_USING_NAMESPACE
-
 namespace coap{
 
 packet * packet::_instanceP = 0;
 packetDestroyer packet::_destroyer;
+error packet::_error;
 
 packet & packet::createInstance()
 {
@@ -41,7 +40,6 @@ packet::packet()
 	_message.headerInfo.asByte = 0;
 	_message.code.asByte = 0;
 	_message.messageId = 0;
-	_error = new error;
 	_is_little_endian = is_little_endian_byte_order();
 	LOG(INFO,"Arhitecture of the CPU is (1 - Little Endian, 0 - Big Endian): ", _is_little_endian);
 	LOG(DEBUG,"Leaving");
@@ -49,7 +47,6 @@ packet::packet()
 
 packet::~packet()
 {
-	delete _error;
 	LOG_DELETE;
 }
 
@@ -123,7 +120,7 @@ bool packet::parse_header(const std::uint8_t * buffer, const size_t length)
 {
 	LOG(DEBUG, "Entering");
 	if (length < PACKET_MIN_LENGTH) {
-		_error->set_code(WRONG_ARGUMENT);
+		_error.set_code(WRONG_ARGUMENT);
 		LOG(ERROR, "Length of buffer is too short, must be at least ", PACKET_MIN_LENGTH, " bytes, but equals ", length);
 		return false;
 	}
@@ -135,8 +132,8 @@ bool packet::parse_header(const std::uint8_t * buffer, const size_t length)
 	LOG(DEBUG,"get_message_tokenLength() =",static_cast<int>(get_message_tokenLength()));
 
 	if (COAP_VERSION != get_message_version()) {
-		_error->set_code(PROTOCOL_VERSION);
-		LOG(ERROR, _error->get_message());
+		_error.set_code(PROTOCOL_VERSION);
+		LOG(ERROR, _error.get_message());
 		return false;
 	}
 	set_message_code(buffer[1]);
@@ -158,8 +155,8 @@ bool packet::parse_token(const std::uint8_t * buffer, const size_t length)
 		return true;
 	}
 	if (get_message_tokenLength() > TOKEN_MAX_LENGTH ||
-		length < PACKET_HEADER_SIZE + get_message_tokenLength() ) {
-		_error->set_code(TOKEN_LENGTH);
+		length < PACKET_HEADER_SIZE + static_cast<size_t>(get_message_tokenLength())) {
+		_error.set_code(TOKEN_LENGTH);
 		LOG(ERROR, "Wrong the token lenght, that equals ", get_message_tokenLength(), "(0...8), and a packet length is ", length);
 		return false;
 	}
@@ -203,28 +200,28 @@ bool packet::parse_options(const std::uint8_t * buffer, const size_t length)
 					*modifying = buffer[i + 2] | (buffer[i + 1] << 8);
 				}
 				*modifying += MINUS_TWO_HUNDRED_SIXTY_NINE_OPT_VALUE;
-				i += sizeof(std::uint16_t);			
+				i += sizeof(std::uint16_t);
 			}
 			else if (parsing == RESERVED_FOR_FUTURE) return false;
 			return true;
 		};
 
 		if ( !option_parser (opt.header.asBitfield.delta, &optDelta) ) {
-			_error->set_code(WRONG_OPTION_DELTA);
-			LOG(ERROR, _error->get_message());
+			_error.set_code(WRONG_OPTION_DELTA);
+			LOG(ERROR, _error.get_message());
 			return false;
 		}
 
 		if ( !option_parser (opt.header.asBitfield.length, &optLength) ) {
-			_error->set_code(WRONG_OPTION_LENGTH);
-			LOG(ERROR, _error->get_message());
+			_error.set_code(WRONG_OPTION_LENGTH);
+			LOG(ERROR, _error.get_message());
 			return false;
 		}
 
 		i++;
 
 		if ((buffer + i + optLength) > (buffer + length)) {
-			_error->set_code(WRONG_OPTION_LENGTH);
+			_error.set_code(WRONG_OPTION_LENGTH);
 			LOG(ERROR,"Length of option is too long");
 			return false;
 		}

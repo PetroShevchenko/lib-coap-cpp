@@ -19,7 +19,7 @@ enum {
 };
 
 using message_type_t =
-enum {
+enum message_type_e {
 	CONFIRMABLE 	= 0x0,
 	NON_CONFIRMABLE = 0x1,
 	ACKNOWLEDGEMENT = 0x2,
@@ -27,7 +27,7 @@ enum {
 };
 
 using message_code_class_t =
-enum {
+enum message_code_class_e {
 	METHOD 			= (0x0 << 5),
 	SUCCESS 		= (0x2 << 5),
 	CLIENT_ERROR 	= (0x4 << 5),
@@ -36,7 +36,7 @@ enum {
 };
 
 using message_code_t =
-enum {
+enum message_code_e {
 	EMPTY 	= METHOD | 0x0,
 	GET 	= METHOD | 0x1,
 	POST	= METHOD | 0x2,
@@ -78,14 +78,14 @@ enum {
 };
 
 using option_delta_t =
-enum {
+enum option_delta_e {
 	MINUS_THIRTEEN = 13,
 	MINUS_TWO_HUNDRED_SIXTY_NINE = 14,
 	RESERVED_FOR_FUTURE = 15
 };
 
 using option_number_t =
-enum {
+enum option_number_e {
 	IF_MATCH 		= 0,
 	URI_HOST 		= 3,
 	ETAG     		= 4,
@@ -104,7 +104,7 @@ enum {
 };
 
 using media_type_t =
-enum {
+enum media_type_e {
 	TEXT_PLAIN 		= 0,
 	LINK_FORMAT 	= 40,
 	XML 			= 41,
@@ -112,6 +112,16 @@ enum {
 	EXI 			= 47,
 	JSON 			= 50
 };
+
+using method_code_t =
+enum method_code_e {
+	METHOD_GET,
+	METHOD_POST,
+	METHOD_PUT,
+	METHOD_DELETE,
+	METHODS_COUNT
+};
+#define METHOD_MIN METHOD_GET
 
 class packet;
 
@@ -138,7 +148,7 @@ private:
 	static packet * _instanceP;
 	static packetDestroyer _destroyer;
 
-	error * _error;
+	static error _error;
 	bool _is_little_endian;
 
 	using option_t =

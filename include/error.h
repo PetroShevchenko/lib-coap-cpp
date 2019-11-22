@@ -14,6 +14,7 @@ enum
 	TOKEN_LENGTH,
 	WRONG_OPTION_DELTA,
 	WRONG_OPTION_LENGTH,
+	WRONG_URI_PATH,
 	UNKNOWN
 };
 #define ERROR_CODE_MIN OK
@@ -33,6 +34,7 @@ protected:
 		"Wrong the token length",
 		"Wrong the option parameter delta",
 		"Wrong the option parameter length",
+		"Wrong URI path use something like this /0/1 or /first/second",
 		"Unknown error"
 	};
 

@@ -265,4 +265,38 @@ bool packet::parse(const std::uint8_t * buffer, const size_t length)
 	return returnCode;
 }
 
+const packet::option_t * packet::find_options(const std::uint8_t number, size_t * quantity)
+{
+	int min = 0 , max = _message.options.size(), mid  = 0;
+	*quantity = 0;
+
+	while (min <= max)
+	{
+		mid = (min + max) >> 1;
+
+		if ( _message.options[mid].number < number) {
+			max = mid + 1;
+		}
+		else if (_message.options[mid].number > number) {
+			max = mid - 1;
+		}
+		else {
+			int index = mid;
+			while (index >= min) 
+			{
+				if (_message.options[--index].number != number) {
+					min = index + 1;
+					break;
+				}
+			}
+			while (_message.options[++index].number == number)
+			{
+				*quantity++;
+			}
+			return &_message.options[min];
+		}
+	}
+	return nullptr;
+}
+
 }//coap

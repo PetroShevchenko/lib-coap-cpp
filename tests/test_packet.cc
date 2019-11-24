@@ -56,6 +56,14 @@ int main()
 		//LOG_SET_STREAM_FORMAT(std::ios::hex, std::ios::basefield);
 		LOG(DEBUG, instance);
 
+		const packet::option_t * optP;
+		size_t quantity;
+
+		optP = instance.find_options (0, &quantity);
+		LOG(DEBUG, *optP);
+		
+
+
 		if (!delete_packet(instance))
 			LOG(DEBUG, "Packet was not deleted");
 	}

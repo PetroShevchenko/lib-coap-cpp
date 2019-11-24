@@ -136,21 +136,7 @@ public:
 
 class packet {
 
-protected:
-	packet();
-	~packet();
-
-	friend class packetDestroyer;
-
-private:
-	LOG_CREATE(NONE,std::clog);
-
-	static packet * _instanceP;
-	static packetDestroyer _destroyer;
-
-	static error _error;
-	bool _is_little_endian;
-
+public:
 	using option_t =
 	struct {
 		union {
@@ -165,6 +151,21 @@ private:
 		std::uint8_t number;
 		std::vector<std::uint8_t> value;
 	};
+
+protected:
+	packet();
+	~packet();
+
+	friend class packetDestroyer;
+
+private:
+	LOG_CREATE(NONE,std::clog);
+
+	static packet * _instanceP;
+	static packetDestroyer _destroyer;
+
+	static error _error;
+	bool _is_little_endian;
 
 	using header_t =
 	union {
@@ -214,6 +215,7 @@ public:
 	packet & operator=(const packet &) = delete;
 
 	bool parse(const std::uint8_t * buffer, const size_t length);
+	const option_t * find_options(const std::uint8_t number, size_t * quantity);
 
 	friend std::ostream & operator<<(std::ostream & os,const option_t &option);
 	friend std::ostream & operator<<(std::ostream & os,const header_t &header);

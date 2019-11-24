@@ -62,16 +62,14 @@ bool uri::path_to_uri()
 void uri::uri_to_path()
 {
 	if (_uri.type == URI_TYPE_STRING) {
-		size_t i = _uri.asString.size();
-		while (i--)
+		for (size_t i = 0; i < _uri.asString.size(); i++)
 		{
 			_path += "/";
 			_path += _uri.asString[i];
 		}
 	}
 	else if (_uri.type == URI_TYPE_INTEGER) {
-		size_t i = _uri.asInteger.size();
-		while (i--)
+		for (size_t i =0; i < _uri.asInteger.size(); i++)
 		{
 			_path += "/";
 			_path += std::to_string(_uri.asInteger[i]);

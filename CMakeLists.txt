@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.5)
 
 set(PROJECT_NAME "test_app")
-set(SRC_LIST tests/test_uri.cc
+set(SRC_LIST tests/test_packet.cc
 				src/packet.cc
 				src/uri.cc)
 

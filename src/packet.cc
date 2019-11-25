@@ -61,11 +61,9 @@ void packetDestroyer::initialize(packet * p)
 
 std::ostream & operator<<(std::ostream & os,const packet::option_t &option)
 {
-	static unsigned short optionsCounter = 0;
-	os << "option #" << ++optionsCounter <<
+	os << "option #" << static_cast<unsigned short>(option.number) <<
 		" delta: " << static_cast<unsigned short>(option.header.asBitfield.delta) <<
 		" length: " << static_cast<unsigned short>(option.header.asBitfield.length) <<
-		" number: " << static_cast<unsigned short>(option.number) <<
 		" value: ";
 	for(auto v:option.value)
 		os << static_cast<int>(v) << " ";
@@ -282,7 +280,7 @@ const packet::option_t * packet::find_options(const std::uint8_t number, size_t 
 		}
 		else {
 			int index = mid;
-			while (index >= min) 
+			while (index >= min)
 			{
 				if (_message.options[--index].number != number) {
 					min = index + 1;
@@ -291,7 +289,7 @@ const packet::option_t * packet::find_options(const std::uint8_t number, size_t 
 			}
 			while (_message.options[++index].number == number)
 			{
-				*quantity++;
+				(*quantity)++;
 			}
 			return &_message.options[min];
 		}

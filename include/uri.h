@@ -47,7 +47,7 @@ public:
 	uri(std::string);
 	uri(uri_t);
 
-	~uri()
+	virtual ~uri()
 	{
 		LOG_DELETE;
 	}

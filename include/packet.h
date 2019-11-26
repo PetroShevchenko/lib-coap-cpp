@@ -18,6 +18,17 @@ enum {
 	MINUS_TWO_HUNDRED_SIXTY_NINE_OPT_VALUE = 269
 };
 
+using message_offset_t =
+enum message_offset_e {
+	HEADER_OFFSET 		= 0x0,
+	HEADER_SIZE 		= 0x1,
+	CODE_OFFSET 		= HEADER_OFFSET + HEADER_SIZE,
+	CODE_SIZE 			= 0x1,
+	MESSAGE_ID_OFFSET 	= CODE_OFFSET + CODE_SIZE,
+	MESSAGE_ID_SIZE		= 0x2,
+	TOKEN_OFFSET		= MESSAGE_ID_OFFSET + MESSAGE_ID_SIZE
+};
+
 using message_type_t =
 enum message_type_e {
 	CONFIRMABLE 	= 0x0,
@@ -215,6 +226,8 @@ public:
 	packet & operator=(const packet &) = delete;
 
 	bool parse(const std::uint8_t * buffer, const size_t length);
+	bool serialize(std::uint8_t * buffer, size_t * length);
+
 	const option_t * find_options(const std::uint8_t number, size_t * quantity);
 
 	friend std::ostream & operator<<(std::ostream & os,const option_t &option);
@@ -222,6 +235,8 @@ public:
 	friend std::ostream & operator<<(std::ostream & os,const code_t &code);
 	friend std::ostream & operator<<(std::ostream & os,const message_t &message);
 	friend std::ostream & operator<<(std::ostream & os,const packet &object);
+
+	static std::uint8_t get_option_nibble(uint32_t value);
 
 	static bool is_little_endian_byte_order()
 	{

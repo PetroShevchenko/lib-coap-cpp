@@ -37,7 +37,6 @@ int main()
    		0x3e
    	};
 
-
 	try {
 
 		static packet & instance = new_packet();
@@ -62,6 +61,26 @@ int main()
 		optP = instance.find_options (0, &quantity);
 		LOG(DEBUG, *optP);
 		LOG(DEBUG, "Number of options #0 : ",quantity);
+
+		LOG_SET_STREAM_FORMAT(std::ios::dec, std::ios::basefield);
+
+		size_t length = 180;
+		std::uint8_t * buffer = new unsigned char [length];
+
+		if (!instance.serialize(buffer, &length)) {
+			LOG(ERROR, "serialize is failure");
+		}
+		else {
+			LOG(DEBUG,"\nbuffer[ ", length, " ] = ");
+			LOG_SET_STREAM_FORMAT(std::ios::hex, std::ios::basefield);
+			for(size_t i = 0; i < length; i++)
+			{
+				std::clog << static_cast<unsigned short>(buffer [i]) << " ";
+				if ( i % 16 == 0) std::clog << "\n";
+			}
+		}
+
+		delete [] buffer;
 
 		if (!delete_packet(instance))
 			LOG(DEBUG, "Packet was not deleted");

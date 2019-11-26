@@ -297,4 +297,116 @@ const packet::option_t * packet::find_options(const std::uint8_t number, size_t 
 	return nullptr;
 }
 
+std::uint8_t packet::get_option_nibble(uint32_t value)
+{
+	std::uint8_t nibble = 0;
+	if (value < MINUS_THIRTEEN_OPT_VALUE) {
+		nibble = value & 0xFF;
+	}
+	else if (value <= 0xFF + MINUS_THIRTEEN_OPT_VALUE) {
+		nibble = MINUS_THIRTEEN;
+	}
+	else if (value <= 0xFFFF + MINUS_TWO_HUNDRED_SIXTY_NINE_OPT_VALUE) {
+		nibble = MINUS_TWO_HUNDRED_SIXTY_NINE;
+	}
+	return nibble;
+}
+
+bool packet::serialize(std::uint8_t * buffer, size_t * length)
+{
+	size_t offset = 0;
+
+	if (*length < static_cast<unsigned>(PACKET_MIN_LENGTH + _message.headerInfo.asBitfield.tokenLength)) {
+		LOG(DEBUG,"Buffer length is wrong");
+		_error.set_code(WRONG_ARGUMENT);
+		return false;
+	}
+
+	buffer [HEADER_OFFSET]  = _message.headerInfo.asByte;
+	buffer [CODE_OFFSET] 	= _message.code.asByte;
+
+	offset = MESSAGE_ID_OFFSET;
+
+	if (get_is_little_endian()) {
+		buffer [offset] 	= _message.messageId & 0xFF;
+		buffer [offset + 1]	= (_message.messageId >> 8 ) & 0xFF;
+	}
+	else {
+		buffer [offset] 	= (_message.messageId >> 8 ) & 0xFF;
+		buffer [offset + 1] = _message.messageId & 0xFF;
+	}
+
+	offset = TOKEN_OFFSET;
+
+	size_t tokenLength = static_cast<size_t>(_message.headerInfo.asBitfield.tokenLength);
+
+	if (tokenLength > TOKEN_MAX_LENGTH) {
+		LOG(DEBUG,"Token length is wrong");
+		_error.set_code(TOKEN_LENGTH);
+		return false;
+	}
+	if (tokenLength != 0) std::memcpy (buffer + offset, _message.token, tokenLength);
+
+	offset += tokenLength;
+
+	for (auto opt : _message.options)
+	{
+		std::uint32_t optDelta = 0;
+		std::uint8_t optNumDelta = 0;
+		std::uint8_t lengthNibble = 0;
+		std::uint8_t deltaNibble = 0;
+
+		auto option_maker = [&](std::uint8_t firstParsing, std::uint8_t secondParsing)
+		{
+			if (firstParsing == MINUS_THIRTEEN) {
+				buffer [offset++] = secondParsing - MINUS_THIRTEEN_OPT_VALUE;
+			}
+			else if (firstParsing == MINUS_TWO_HUNDRED_SIXTY_NINE) {
+				buffer [offset++] = (secondParsing - MINUS_TWO_HUNDRED_SIXTY_NINE_OPT_VALUE) >> 8;
+				buffer [offset++] = (secondParsing - MINUS_TWO_HUNDRED_SIXTY_NINE_OPT_VALUE) & 0xFF;
+			}
+		};
+
+		if (offset > *length) {
+			LOG(DEBUG, "The buffer length is too small");
+			_error.set_code(BUFFER_LENGTH);
+			return false;
+		}
+
+		optDelta = opt.number - optNumDelta;
+
+		deltaNibble = get_option_nibble(optDelta);
+		lengthNibble = get_option_nibble(static_cast<std::uint32_t>(opt.value.size()));
+
+        buffer [offset++] = (deltaNibble << 4 | lengthNibble) & 0xFF;
+
+		option_maker (deltaNibble, optDelta);
+		option_maker (lengthNibble, static_cast<std::uint8_t>(opt.value.size()));
+
+		std::memcpy (buffer + offset, opt.value.data(), opt.value.size());
+		offset += opt.value.size();
+		optNumDelta = opt.number;
+	}
+
+	size_t optionsLength = offset - tokenLength - PACKET_HEADER_SIZE;
+
+	if (_message.payload.size() == 0) {
+		*length = offset;
+	}
+	else {
+		if (*length < PACKET_HEADER_SIZE + tokenLength + optionsLength
+										 + sizeof(_message.payloadMarker) + _message.payload.size()) {
+			LOG(DEBUG, "The buffer length is too small");
+			_error.set_code(BUFFER_LENGTH);
+			return false;
+		}
+		offset = PACKET_HEADER_SIZE + tokenLength + optionsLength;
+		buffer [offset] = _message.payloadMarker;
+		offset += sizeof(_message.payloadMarker);
+		*length = offset + _message.payload.size();
+		std::memcpy (buffer + offset, _message.payload.data(), *length);
+	}
+	return true;
+}
+
 }//coap

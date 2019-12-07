@@ -1,0 +1,3 @@
+[submodule "examples/third-party/wolfssl"]
+	path = examples/third-party/wolfssl
+	url = https://github.com/wolfSSL/wolfssl.git

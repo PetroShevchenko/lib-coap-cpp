@@ -4,3 +4,7 @@
 [submodule "examples/boards/NUCLEO-F429ZI/mbed-os-coap-client/mbed-os"]
 	path = examples/boards/NUCLEO-F429ZI/mbed-os-coap-client/mbed-os
 	url = https://github.com/ARMmbed/mbed-os.git
+[submodule "examples/third-party/wolfssl"]
+	path = examples/third-party/wolfssl
+	url = https://github.com/wolfSSL/wolfssl.git
+

@@ -1,5 +1,6 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
+#include <cstdint>
 
 namespace coap{
 
@@ -13,10 +14,20 @@ protected:
     size_t _length;
 
 public:
-	virtual void establish();
-	virtual void disconnect();
-	virtual void send();
-	virtual void receive();
+	connection(std::string address, int port): _address(address), _port(port){};		
+	virtual ~connection(){};
+	virtual bool establish();
+	virtual bool disconnect();
+	virtual bool send();
+	virtual bool receive();
+	std::uint8_t get_buffer()
+	{
+		return _buffer;
+	}
+	size_t get_length() const
+	{
+		return _length;
+	}
 };
 
 

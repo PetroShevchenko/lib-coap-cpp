@@ -1,0 +1,6 @@
+[submodule "examples/boards/ESP-WROOM-32/esp-idf"]
+	path = examples/boards/ESP-WROOM-32/esp-idf
+	url = https://github.com/espressif/esp-idf.git
+[submodule "examples/boards/NUCLEO-F429ZI/mbed-os-coap-client/mbed-os"]
+	path = examples/boards/NUCLEO-F429ZI/mbed-os-coap-client/mbed-os
+	url = https://github.com/ARMmbed/mbed-os.git

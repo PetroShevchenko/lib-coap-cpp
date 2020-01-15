@@ -349,6 +349,8 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length)
 
 	offset += tokenLength;
 
+	assert(offset < *length);
+
 	for (auto opt : _message.options)
 	{
 		std::uint32_t optDelta = 0;
@@ -365,6 +367,7 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length)
 				buffer [offset++] = (secondParsing - MINUS_TWO_HUNDRED_SIXTY_NINE_OPT_VALUE) >> 8;
 				buffer [offset++] = (secondParsing - MINUS_TWO_HUNDRED_SIXTY_NINE_OPT_VALUE) & 0xFF;
 			}
+			assert(offset < *length);
 		};
 
 		if (offset > *length) {
@@ -379,12 +382,14 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length)
 		lengthNibble = get_option_nibble(static_cast<std::uint32_t>(opt.value.size()));
 
         buffer [offset++] = (deltaNibble << 4 | lengthNibble) & 0xFF;
+        assert(offset < *length);
 
 		option_maker (deltaNibble, optDelta);
 		option_maker (lengthNibble, static_cast<std::uint8_t>(opt.value.size()));
 
 		std::memcpy (buffer + offset, opt.value.data(), opt.value.size());
 		offset += opt.value.size();
+		assert(offset < *length);
 		optNumDelta = opt.number;
 	}
 
@@ -401,10 +406,13 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length)
 			return false;
 		}
 		offset = PACKET_HEADER_SIZE + tokenLength + optionsLength;
+		assert(offset < *length);
 		buffer [offset] = _message.payloadMarker;
 		offset += sizeof(_message.payloadMarker);
+		assert(offset < *length);
+		assert(offset + _message.payload.size() < *length);
 		*length = offset + _message.payload.size();
-		std::memcpy (buffer + offset, _message.payload.data(), *length);
+		std::memcpy (buffer + offset, _message.payload.data(), _message.payload.size());
 	}
 	return true;
 }

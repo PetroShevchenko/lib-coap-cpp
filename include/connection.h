@@ -20,7 +20,7 @@ public:
 	virtual bool disconnect();
 	virtual bool send();
 	virtual bool receive();
-	std::uint8_t get_buffer()
+	std::uint8_t * get_buffer()
 	{
 		return _buffer;
 	}

@@ -1,0 +1,4 @@
+#ifndef JSON_RPC_CLIENT
+#define JSON_RPC_CLIENT
+
+#endif//JSON_RPC_CLIENT

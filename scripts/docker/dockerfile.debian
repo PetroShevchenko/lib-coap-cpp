@@ -1,0 +1,10 @@
+FROM debian:latest
+MAINTAINER Petro Shevchenko <shevchenko.p.i@gmail.com>
+RUN apt-get update -y
+RUN	apt-get install git cmake build-essential make -y
+RUN cd /opt
+RUN mkdir /app
+COPY scripts/docker/build.sh /app
+COPY . /app
+RUN chmod a+x /app/build.sh
+RUN cd /app && ./build.sh

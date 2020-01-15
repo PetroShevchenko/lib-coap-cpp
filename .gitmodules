@@ -8,3 +8,9 @@
 	path = examples/third-party/wolfssl
 	url = https://github.com/wolfSSL/wolfssl.git
 
+[submodule "examples/third-party/jansson"]
+	path = examples/third-party/jansson
+	url = https://github.com/akheron/jansson.git
+[submodule "examples/boards/ARDUINO-MEGA-2560/ArduinoSTL"]
+	path = examples/boards/ARDUINO-MEGA-2560/ArduinoSTL
+	url = https://github.com/mike-matera/ArduinoSTL.git

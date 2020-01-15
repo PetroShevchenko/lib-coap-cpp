@@ -64,10 +64,18 @@ int main()
 
 		LOG_SET_STREAM_FORMAT(std::ios::dec, std::ios::basefield);
 
-		size_t length = 180;
+		size_t length = 0;
+
+		if (!instance.serialize (nullptr, &length, true)) {
+			LOG(ERROR, "unable to check buffer size, corrupted message");
+			throw;
+		}
+
+		LOG(DEBUG, "buffer length is ", length);
+
 		std::uint8_t * buffer = new unsigned char [length];
 
-		if (!instance.serialize(buffer, &length)) {
+		if (!instance.serialize(buffer, &length, false)) {
 			LOG(ERROR, "serialize is failure");
 		}
 		else {

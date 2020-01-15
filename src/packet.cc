@@ -116,6 +116,7 @@ std::ostream & operator<<(std::ostream & os,const packet &object)
 
 bool packet::parse_header(const std::uint8_t * buffer, const size_t length)
 {
+	assert(buffer != nullptr);
 	LOG(DEBUG, "Entering");
 	if (length < PACKET_MIN_LENGTH) {
 		_error.set_code(WRONG_ARGUMENT);
@@ -147,6 +148,7 @@ bool packet::parse_header(const std::uint8_t * buffer, const size_t length)
 
 bool packet::parse_token(const std::uint8_t * buffer, const size_t length)
 {
+	assert(buffer != nullptr);
 	std::memset(_message.token, 0, TOKEN_MAX_LENGTH);
 	if (0 == get_message_tokenLength()) {
 		LOG(DEBUG,"Token is not presented into the packet");
@@ -164,6 +166,7 @@ bool packet::parse_token(const std::uint8_t * buffer, const size_t length)
 
 bool packet::parse_options(const std::uint8_t * buffer, const size_t length)
 {
+	assert(buffer != nullptr);
 	const std::uint8_t * startOptions = buffer + PACKET_HEADER_SIZE + _message.headerInfo.asBitfield.tokenLength;
 	const size_t optionsOffset = static_cast<size_t>(startOptions - buffer);
 	size_t i = 0;
@@ -242,6 +245,8 @@ bool packet::parse_options(const std::uint8_t * buffer, const size_t length)
 
 bool packet::parse_payload(const std::uint8_t * buffer, const size_t length)
 {
+	assert(buffer != nullptr);
+	assert(length >= _message.payloadOffset);
 	const size_t maxPayloadOffset = length - _message.payloadOffset;
 	for (size_t i = 0; i < maxPayloadOffset; i++)
 		_message.payload.push_back(buffer[_message.payloadOffset + i]);
@@ -266,6 +271,8 @@ bool packet::parse(const std::uint8_t * buffer, const size_t length)
 const packet::option_t * packet::find_options(const std::uint8_t number, size_t * quantity)
 {
 	int min = 0 , max = _message.options.size(), mid  = 0;
+	assert(quantity != nullptr);
+
 	*quantity = 0;
 
 	while (min <= max)
@@ -312,28 +319,31 @@ std::uint8_t packet::get_option_nibble(uint32_t value)
 	return nibble;
 }
 
-bool packet::serialize(std::uint8_t * buffer, size_t * length)
+bool packet::serialize(std::uint8_t * buffer, size_t * length, bool checkBufferSizeOnly)
 {
 	size_t offset = 0;
+	assert(length != nullptr);
 
-	if (*length < static_cast<unsigned>(PACKET_MIN_LENGTH + _message.headerInfo.asBitfield.tokenLength)) {
-		LOG(DEBUG,"Buffer length is wrong");
-		_error.set_code(WRONG_ARGUMENT);
-		return false;
+	if (!checkBufferSizeOnly) {
+		assert(buffer != nullptr);
+		assert(*length >= static_cast<unsigned>(PACKET_MIN_LENGTH + _message.headerInfo.asBitfield.tokenLength));
+	}	
+
+	if (!checkBufferSizeOnly) {
+		buffer [HEADER_OFFSET]  = _message.headerInfo.asByte;
+		buffer [CODE_OFFSET] 	= _message.code.asByte;
 	}
-
-	buffer [HEADER_OFFSET]  = _message.headerInfo.asByte;
-	buffer [CODE_OFFSET] 	= _message.code.asByte;
-
 	offset = MESSAGE_ID_OFFSET;
 
-	if (get_is_little_endian()) {
-		buffer [offset] 	= _message.messageId & 0xFF;
-		buffer [offset + 1]	= (_message.messageId >> 8 ) & 0xFF;
-	}
-	else {
-		buffer [offset] 	= (_message.messageId >> 8 ) & 0xFF;
-		buffer [offset + 1] = _message.messageId & 0xFF;
+	if (!checkBufferSizeOnly) {
+		if (get_is_little_endian()) {
+			buffer [offset] 	= _message.messageId & 0xFF;
+			buffer [offset + 1]	= (_message.messageId >> 8 ) & 0xFF;
+		}
+		else {
+			buffer [offset] 	= (_message.messageId >> 8 ) & 0xFF;
+			buffer [offset + 1] = _message.messageId & 0xFF;
+		}		
 	}
 
 	offset = TOKEN_OFFSET;
@@ -345,11 +355,11 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length)
 		_error.set_code(TOKEN_LENGTH);
 		return false;
 	}
-	if (tokenLength != 0) std::memcpy (buffer + offset, _message.token, tokenLength);
+	if (tokenLength != 0 && !checkBufferSizeOnly) std::memcpy (buffer + offset, _message.token, tokenLength);
 
 	offset += tokenLength;
 
-	assert(offset < *length);
+	if (!checkBufferSizeOnly)	assert(offset < *length);
 
 	for (auto opt : _message.options)
 	{
@@ -361,16 +371,20 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length)
 		auto option_maker = [&](std::uint8_t firstParsing, std::uint8_t secondParsing)
 		{
 			if (firstParsing == MINUS_THIRTEEN) {
-				buffer [offset++] = secondParsing - MINUS_THIRTEEN_OPT_VALUE;
+				if (checkBufferSizeOnly) offset++;
+				else buffer [offset++] = secondParsing - MINUS_THIRTEEN_OPT_VALUE;
 			}
 			else if (firstParsing == MINUS_TWO_HUNDRED_SIXTY_NINE) {
-				buffer [offset++] = (secondParsing - MINUS_TWO_HUNDRED_SIXTY_NINE_OPT_VALUE) >> 8;
-				buffer [offset++] = (secondParsing - MINUS_TWO_HUNDRED_SIXTY_NINE_OPT_VALUE) & 0xFF;
+				if (checkBufferSizeOnly) offset += 2;
+				else {
+					buffer [offset++] = (secondParsing - MINUS_TWO_HUNDRED_SIXTY_NINE_OPT_VALUE) >> 8;
+					buffer [offset++] = (secondParsing - MINUS_TWO_HUNDRED_SIXTY_NINE_OPT_VALUE) & 0xFF;
+				}
 			}
-			assert(offset < *length);
+			if (!checkBufferSizeOnly)	assert(offset < *length);
 		};
 
-		if (offset > *length) {
+		if (!checkBufferSizeOnly && offset > *length) {
 			LOG(DEBUG, "The buffer length is too small");
 			_error.set_code(BUFFER_LENGTH);
 			return false;
@@ -381,15 +395,18 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length)
 		deltaNibble = get_option_nibble(optDelta);
 		lengthNibble = get_option_nibble(static_cast<std::uint32_t>(opt.value.size()));
 
-        buffer [offset++] = (deltaNibble << 4 | lengthNibble) & 0xFF;
-        assert(offset < *length);
+		if (!checkBufferSizeOnly) {
+        	buffer [offset++] = (deltaNibble << 4 | lengthNibble) & 0xFF;
+        	assert(offset < *length);
+    	}
+    	else offset++;
 
 		option_maker (deltaNibble, optDelta);
 		option_maker (lengthNibble, static_cast<std::uint8_t>(opt.value.size()));
 
-		std::memcpy (buffer + offset, opt.value.data(), opt.value.size());
+		if (!checkBufferSizeOnly) std::memcpy (buffer + offset, opt.value.data(), opt.value.size());
 		offset += opt.value.size();
-		assert(offset < *length);
+		if (!checkBufferSizeOnly) assert(offset < *length);
 		optNumDelta = opt.number;
 	}
 
@@ -399,20 +416,25 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length)
 		*length = offset;
 	}
 	else {
-		if (*length < PACKET_HEADER_SIZE + tokenLength + optionsLength
+		if (!checkBufferSizeOnly && *length < PACKET_HEADER_SIZE + tokenLength + optionsLength
 										 + sizeof(_message.payloadMarker) + _message.payload.size()) {
 			LOG(DEBUG, "The buffer length is too small");
 			_error.set_code(BUFFER_LENGTH);
 			return false;
 		}
 		offset = PACKET_HEADER_SIZE + tokenLength + optionsLength;
-		assert(offset < *length);
-		buffer [offset] = _message.payloadMarker;
+		if (!checkBufferSizeOnly) { 
+			assert(offset < *length);
+			buffer [offset] = _message.payloadMarker;
+		}
 		offset += sizeof(_message.payloadMarker);
-		assert(offset < *length);
-		assert(offset + _message.payload.size() < *length);
-		*length = offset + _message.payload.size();
-		std::memcpy (buffer + offset, _message.payload.data(), _message.payload.size());
+
+		if (!checkBufferSizeOnly) { 
+			assert(offset < *length);
+			assert(offset + _message.payload.size() <= *length);
+			std::memcpy (buffer + offset, _message.payload.data(), _message.payload.size());
+		}
+		*length = offset + _message.payload.size();		
 	}
 	return true;
 }

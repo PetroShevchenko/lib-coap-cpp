@@ -226,7 +226,7 @@ public:
 	packet & operator=(const packet &) = delete;
 
 	bool parse(const std::uint8_t * buffer, const size_t length);
-	bool serialize(std::uint8_t * buffer, size_t * length);
+	bool serialize(std::uint8_t * buffer, size_t * length, bool checkBufferSizeOnly);
 
 	const option_t * find_options(const std::uint8_t number, size_t * quantity);
 

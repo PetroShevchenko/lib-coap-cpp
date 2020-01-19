@@ -1,10 +1,9 @@
 FROM ubuntu:latest
 MAINTAINER Petro Shevchenko <shevchenko.p.i@gmail.com>
 RUN apt-get update -y
-RUN	apt-get install git cmake build-essential make -y
-RUN cd /opt
-RUN mkdir /app
-COPY scripts/docker/build.sh /app
-COPY . /app
-RUN chmod a+x /app/build.sh
-RUN cd /app && ./build.sh
+RUN	apt-get install git cmake build-essential -y
+RUN mkdir /opt/lib-coap-cpp
+COPY scripts/docker/build.sh /opt/lib-coap-cpp
+COPY . /opt/lib-coap-cpp
+RUN chmod a+x /opt/lib-coap-cpp/build.sh
+RUN cd /opt/lib-coap-cpp && ./build.sh

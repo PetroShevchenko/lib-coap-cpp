@@ -7,9 +7,9 @@ namespace coap{
 class connection {
 
 protected:
-    int _socket;
-    int _port;
     std::string _address;
+    int _port;
+    int _socket;
     std::uint8_t * _buffer;
     size_t _length;
 

@@ -439,4 +439,23 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length, bool checkBufferS
 	return true;
 }
 
+void packet::makeAnswer(message_type_t messageType,
+						std::uint16_t messageId,
+						message_code_t responseCode,
+						const std::uint8_t * payload,
+						const size_t payloadLength,
+						media_type_t payloadType)
+{
+	assert(payload != nullptr);
+	set_message_version(COAP_VERSION);
+	set_message_type(static_cast<std::uint8_t>(messageType));
+	set_message_messageId(messageId);
+	set_message_code(static_cast<std::uint8_t>(responseCode));
+	_message.options.clear();
+	_message.options[0].number = static_cast<std::uint8_t>(CONTENT_FORMAT);
+	_message.options[0].value[0] = (static_cast<std::uint16_t>(payloadType) & 0xFF00) >> 8; 
+	_message.options[0].value[1] = (static_cast<std::uint16_t>(payloadType) & 0x00FF);
+	std::memcpy(_message.payload.data(), payload, payloadLength);
+}
+
 }//coap

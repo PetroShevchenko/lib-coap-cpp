@@ -89,6 +89,39 @@ int main()
 		}
 
 		delete [] buffer;
+		
+		std::uint16_t messageId = instance.get_message_messageId();
+
+		const std::uint8_t payload[] = "{""result"": ""Hello JSON-RPC"", ""error"": null, ""id"":1}";
+
+		instance.makeAnswer (ACKNOWLEDGEMENT, ++messageId, CONTENT, payload, sizeof(payload), JSON);
+
+		if (!instance.serialize (nullptr, &length, true)) {
+			LOG(ERROR, "unable to check buffer size, corrupted message");
+			throw;
+		}
+		
+		LOG(DEBUG, "ANSWER :");
+
+		LOG(DEBUG, "buffer length is ", length);
+
+		buffer = new unsigned char [length];
+
+		if (!instance.serialize(buffer, &length, false)) {
+			LOG(ERROR, "serialize is failure");
+		}
+		else {
+			LOG(DEBUG,"\nbuffer[ ", length, " ] = ");
+			LOG_SET_STREAM_FORMAT(std::ios::hex, std::ios::basefield);
+			for(size_t i = 0; i < length; i++)
+			{
+				std::clog << static_cast<unsigned short>(buffer [i]) << " ";
+				if ( i % 16 == 0) std::clog << "\n";
+			}
+		}
+
+		delete [] buffer;	
+
 
 		if (!delete_packet(instance))
 			LOG(DEBUG, "Packet was not deleted");

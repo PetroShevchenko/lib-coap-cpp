@@ -227,6 +227,12 @@ public:
 
 	bool parse(const std::uint8_t * buffer, const size_t length);
 	bool serialize(std::uint8_t * buffer, size_t * length, bool checkBufferSizeOnly);
+	void makeAnswer(message_type_t messageType,
+					std::uint16_t messageId,
+					message_code_t responseCode,
+					const std::uint8_t * payload,
+					const size_t payloadLength,
+					media_type_t payloadType);
 
 	const option_t * find_options(const std::uint8_t number, size_t * quantity);
 

@@ -109,9 +109,13 @@ enum option_number_e {
 	URI_QUERY 		= 15,
 	ACCEPT 			= 17,
 	LOCATION_QUERY 	= 20,
+	BLOCK_2			= 23,
+	BLOCK_1			= 27,
+	SIZE_2			= 28,
 	PROXY_URI 		= 35,
 	PROXY_SCHEME 	= 39,
-	SIZE_1 			= 60
+	SIZE_1 			= 60,
+	OPTION_MAP_SIZE = SIZE_1
 };
 
 using media_type_t =
@@ -177,6 +181,7 @@ private:
 
 	static error _error;
 	bool _is_little_endian;
+	std::uint32_t _option_bitmap[2];
 
 	using header_t =
 	union {
@@ -227,7 +232,7 @@ public:
 
 	bool parse(const std::uint8_t * buffer, const size_t length);
 	bool serialize(std::uint8_t * buffer, size_t * length, bool checkBufferSizeOnly);
-	void makeAnswer(message_type_t messageType,
+	void prepare_answer(message_type_t messageType,
 					std::uint16_t messageId,
 					message_code_t responseCode,
 					const std::uint8_t * payload,
@@ -235,6 +240,34 @@ public:
 					media_type_t payloadType);
 
 	const option_t * find_options(const std::uint8_t number, size_t * quantity);
+
+	bool set_option (option_number_t number)
+	{
+		std::uint8_t tmp = static_cast<uint8_t>(number);
+		if (number > OPTION_MAP_SIZE)
+			return false;
+		if (tmp > 31)
+			_option_bitmap[1] |= (1 << (tmp - 32));
+		else
+			_option_bitmap[0] |= (1 << tmp);
+		return true;
+	}
+
+	bool is_option_set(option_number_t number)
+	{
+		std::uint8_t tmp = static_cast<uint8_t>(number);
+		if (number > OPTION_MAP_SIZE)
+			return false;
+		if (tmp > 31)
+			return _option_bitmap[1] & (1 << (tmp - 32));
+		else
+			return _option_bitmap[0] & (1 << tmp);
+	}
+
+	std::uint32_t * get_option_bitmap()
+	{
+		return _option_bitmap;
+	}
 
 	friend std::ostream & operator<<(std::ostream & os,const option_t &option);
 	friend std::ostream & operator<<(std::ostream & os,const header_t &header);

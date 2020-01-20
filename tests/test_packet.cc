@@ -75,6 +75,28 @@ int main()
 
 		std::uint8_t * buffer = new unsigned char [length];
 
+		instance.set_option(IF_MATCH);
+		instance.set_option(URI_HOST);
+		instance.set_option(ETAG);
+		instance.set_option(IF_NONE_MATCH);
+		instance.set_option(URI_PORT);
+		instance.set_option(LOCATION_PATH);
+		instance.set_option(URI_PATH);
+		instance.set_option(CONTENT_FORMAT);
+		instance.set_option(MAX_AGE);
+		instance.set_option(URI_QUERY);
+		instance.set_option(ACCEPT);
+		instance.set_option(LOCATION_QUERY);
+		instance.set_option(BLOCK_2);
+		instance.set_option(BLOCK_1);
+		instance.set_option(SIZE_2);
+		instance.set_option(PROXY_URI);
+		instance.set_option(PROXY_SCHEME);
+		instance.set_option(SIZE_1);
+
+		LOG(DEBUG, "option_bitmap[0] = ", instance.get_option_bitmap()[0] );
+		LOG(DEBUG, "option_bitmap[1] = ", instance.get_option_bitmap()[1] );
+
 		if (!instance.serialize(buffer, &length, false)) {
 			LOG(ERROR, "serialize is failure");
 		}
@@ -89,18 +111,18 @@ int main()
 		}
 
 		delete [] buffer;
-		
+
 		std::uint16_t messageId = instance.get_message_messageId();
 
 		const std::uint8_t payload[] = "{""result"": ""Hello JSON-RPC"", ""error"": null, ""id"":1}";
 
-		instance.makeAnswer (ACKNOWLEDGEMENT, ++messageId, CONTENT, payload, sizeof(payload), JSON);
+		instance.prepare_answer (ACKNOWLEDGEMENT, ++messageId, CONTENT, payload, sizeof(payload), JSON);
 
 		if (!instance.serialize (nullptr, &length, true)) {
 			LOG(ERROR, "unable to check buffer size, corrupted message");
 			throw;
 		}
-		
+
 		LOG(DEBUG, "ANSWER :");
 
 		LOG(DEBUG, "buffer length is ", length);
@@ -120,7 +142,7 @@ int main()
 			}
 		}
 
-		delete [] buffer;	
+		delete [] buffer;
 
 
 		if (!delete_packet(instance))

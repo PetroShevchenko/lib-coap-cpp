@@ -41,6 +41,8 @@ packet::packet()
 	_message.code.asByte = 0;
 	_message.messageId = 0;
 	_is_little_endian = is_little_endian_byte_order();
+	_option_bitmap[0] = 0;
+	_option_bitmap[1] = 0;
 	LOG(INFO,"Arhitecture of the CPU is (1 - Little Endian, 0 - Big Endian): ", _is_little_endian);
 	LOG(DEBUG,"Leaving");
 }
@@ -327,7 +329,7 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length, bool checkBufferS
 	if (!checkBufferSizeOnly) {
 		assert(buffer != nullptr);
 		assert(*length >= static_cast<unsigned>(PACKET_MIN_LENGTH + _message.headerInfo.asBitfield.tokenLength));
-	}	
+	}
 
 	if (!checkBufferSizeOnly) {
 		buffer [HEADER_OFFSET]  = _message.headerInfo.asByte;
@@ -343,7 +345,7 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length, bool checkBufferS
 		else {
 			buffer [offset] 	= (_message.messageId >> 8 ) & 0xFF;
 			buffer [offset + 1] = _message.messageId & 0xFF;
-		}		
+		}
 	}
 
 	offset = TOKEN_OFFSET;
@@ -423,23 +425,23 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length, bool checkBufferS
 			return false;
 		}
 		offset = PACKET_HEADER_SIZE + tokenLength + optionsLength;
-		if (!checkBufferSizeOnly) { 
+		if (!checkBufferSizeOnly) {
 			assert(offset < *length);
 			buffer [offset] = _message.payloadMarker;
 		}
 		offset += sizeof(_message.payloadMarker);
 
-		if (!checkBufferSizeOnly) { 
+		if (!checkBufferSizeOnly) {
 			assert(offset < *length);
 			assert(offset + _message.payload.size() <= *length);
 			std::memcpy (buffer + offset, _message.payload.data(), _message.payload.size());
 		}
-		*length = offset + _message.payload.size();		
+		*length = offset + _message.payload.size();
 	}
 	return true;
 }
 
-void packet::makeAnswer(message_type_t messageType,
+void packet::prepare_answer(message_type_t messageType,
 						std::uint16_t messageId,
 						message_code_t responseCode,
 						const std::uint8_t * payload,
@@ -453,7 +455,7 @@ void packet::makeAnswer(message_type_t messageType,
 	set_message_code(static_cast<std::uint8_t>(responseCode));
 	_message.options.clear();
 	_message.options[0].number = static_cast<std::uint8_t>(CONTENT_FORMAT);
-	_message.options[0].value[0] = (static_cast<std::uint16_t>(payloadType) & 0xFF00) >> 8; 
+	_message.options[0].value[0] = (static_cast<std::uint16_t>(payloadType) & 0xFF00) >> 8;
 	_message.options[0].value[1] = (static_cast<std::uint16_t>(payloadType) & 0x00FF);
 	std::memcpy(_message.payload.data(), payload, payloadLength);
 }

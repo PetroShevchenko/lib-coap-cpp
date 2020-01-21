@@ -15,7 +15,8 @@ enum {
 	PACKET_MIN_LENGTH = PACKET_HEADER_SIZE,
 	TOKEN_MAX_LENGTH = 8,
 	MINUS_THIRTEEN_OPT_VALUE = 13,
-	MINUS_TWO_HUNDRED_SIXTY_NINE_OPT_VALUE = 269
+	MINUS_TWO_HUNDRED_SIXTY_NINE_OPT_VALUE = 269,
+	OPTION_MAX_LENGTH = 256
 };
 
 using message_offset_t =
@@ -115,7 +116,7 @@ enum option_number_e {
 	PROXY_URI 		= 35,
 	PROXY_SCHEME 	= 39,
 	SIZE_1 			= 60,
-	OPTION_MAP_SIZE = SIZE_1
+	OPTION_MAX_NUMBER = SIZE_1
 };
 
 using media_type_t =
@@ -153,7 +154,7 @@ class packet {
 
 public:
 	using option_t =
-	struct {
+	struct option_s {
 		union {
 			std::uint8_t asByte;
 			#pragma pack(push,1)
@@ -166,6 +167,11 @@ public:
 		std::uint8_t number;
 		std::vector<std::uint8_t> value;
 	};
+
+    friend bool operator<(const option_s & opt1, const option_s & opt2)
+    {
+        return opt1.number < opt2.number;
+    }
 
 protected:
 	packet();
@@ -217,6 +223,11 @@ private:
 		size_t payloadOffset;
 		std::vector <uint8_t> payload;
 	};
+
+private:
+	void set_option_bitmap (option_number_t number);
+	bool is_option_set(option_number_t number);
+
 public:
 	message_t _message;
 
@@ -240,28 +251,10 @@ public:
 					media_type_t payloadType);
 
 	const option_t * find_options(const std::uint8_t number, size_t * quantity);
-
-	bool set_option (option_number_t number)
+	void add_option(option_number_t number, const std::uint8_t * value, const size_t length);
+	void clean_options()
 	{
-		std::uint8_t tmp = static_cast<uint8_t>(number);
-		if (number > OPTION_MAP_SIZE)
-			return false;
-		if (tmp > 31)
-			_option_bitmap[1] |= (1 << (tmp - 32));
-		else
-			_option_bitmap[0] |= (1 << tmp);
-		return true;
-	}
-
-	bool is_option_set(option_number_t number)
-	{
-		std::uint8_t tmp = static_cast<uint8_t>(number);
-		if (number > OPTION_MAP_SIZE)
-			return false;
-		if (tmp > 31)
-			return _option_bitmap[1] & (1 << (tmp - 32));
-		else
-			return _option_bitmap[0] & (1 << tmp);
+		_message.options.clear();
 	}
 
 	std::uint32_t * get_option_bitmap()

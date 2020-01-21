@@ -16,9 +16,10 @@ Docker container technology can be used to build the library and examples, as we
 If you want to use building in a Docker container you should firstly install Docker.
 How it perform you can read in the Docker documentation by link https://docs.docker.com/.
 You are given a choice of three options for building a Docker image :
-1. Ubuntu based Docker image
-2. Debian based Docker image
-3. Fedora based Docker image
+* Ubuntu based Docker image
+* Debian based Docker image
+* Fedora based Docker image
+
 To select one of the build options, select the name of the Docker file in the Makefile.
 Default file name is dockerfile.fedora.
 
@@ -33,8 +34,15 @@ After you see the prompt like this [root@89b23f25cfc7 /]# you can select the
 project directory and work with the project there :
 
 * cd /opt/lib-coap-cpp
-* make
+* ./build.sh
 
-### 1.2.Build in Ubuntu Linux
+### 1.2.Build in a Unix-like operating system
+Firstly make sure that you have installed utilities described above, such as cmake, gmake, g++.
+Then you should open a command terminal and compile the project.
+
+#### Compiling
+* cd lib-coap-cpp
+* make build
+
+## Quickstart
 TODO
-## QuickstartYODO

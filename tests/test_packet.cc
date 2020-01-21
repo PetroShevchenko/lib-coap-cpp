@@ -64,6 +64,30 @@ int main()
 
 		LOG_SET_STREAM_FORMAT(std::ios::dec, std::ios::basefield);
 
+		instance.clean_options();
+
+		std::uint8_t opt_value[2] = {0xAA, 0xBB};
+
+		instance.add_option(LOCATION_QUERY, opt_value, 2);
+		instance.add_option(BLOCK_2, opt_value, 2);
+		instance.add_option(BLOCK_1, opt_value, 2);
+		instance.add_option(SIZE_2, opt_value, 2);
+		instance.add_option(PROXY_URI, opt_value, 2);
+		instance.add_option(PROXY_SCHEME, opt_value, 2);
+		instance.add_option(SIZE_1, opt_value, 2);
+		instance.add_option(IF_MATCH, opt_value, 2);
+		instance.add_option(URI_HOST, opt_value, 2);
+		instance.add_option(ETAG, opt_value, 2);
+		instance.add_option(IF_NONE_MATCH, opt_value, 2);
+		instance.add_option(URI_PORT, opt_value, 2);
+		instance.add_option(LOCATION_PATH, opt_value, 2);
+		instance.add_option(URI_PATH, opt_value, 2);
+		instance.add_option(CONTENT_FORMAT, opt_value, 2);
+		instance.add_option(MAX_AGE, opt_value, 2);
+		instance.add_option(URI_QUERY, opt_value, 2);
+		instance.add_option(ACCEPT, opt_value, 2);
+
+
 		size_t length = 0;
 
 		if (!instance.serialize (nullptr, &length, true)) {
@@ -75,24 +99,6 @@ int main()
 
 		std::uint8_t * buffer = new unsigned char [length];
 
-		instance.set_option(IF_MATCH);
-		instance.set_option(URI_HOST);
-		instance.set_option(ETAG);
-		instance.set_option(IF_NONE_MATCH);
-		instance.set_option(URI_PORT);
-		instance.set_option(LOCATION_PATH);
-		instance.set_option(URI_PATH);
-		instance.set_option(CONTENT_FORMAT);
-		instance.set_option(MAX_AGE);
-		instance.set_option(URI_QUERY);
-		instance.set_option(ACCEPT);
-		instance.set_option(LOCATION_QUERY);
-		instance.set_option(BLOCK_2);
-		instance.set_option(BLOCK_1);
-		instance.set_option(SIZE_2);
-		instance.set_option(PROXY_URI);
-		instance.set_option(PROXY_SCHEME);
-		instance.set_option(SIZE_1);
 
 		LOG(DEBUG, "option_bitmap[0] = ", instance.get_option_bitmap()[0] );
 		LOG(DEBUG, "option_bitmap[1] = ", instance.get_option_bitmap()[1] );

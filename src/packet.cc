@@ -2,6 +2,7 @@
 #include "log.h"
 #include "error.h"
 #include <cstring>
+#include <algorithm>
 
 namespace coap{
 
@@ -270,6 +271,25 @@ bool packet::parse(const std::uint8_t * buffer, const size_t length)
 	return returnCode;
 }
 
+void packet::set_option_bitmap (option_number_t number)
+{
+	std::uint8_t tmp = static_cast<uint8_t>(number);
+	if (tmp > 31)
+		_option_bitmap[1] |= (1 << (tmp - 32));
+	else
+		_option_bitmap[0] |= (1 << tmp);
+}
+
+bool packet::is_option_set(option_number_t number)
+{
+	std::uint8_t tmp = static_cast<uint8_t>(number);
+	if (tmp > 31)
+		return _option_bitmap[1] & (1 << (tmp - 32));
+	else
+		return _option_bitmap[0] & (1 << tmp);
+}
+
+
 const packet::option_t * packet::find_options(const std::uint8_t number, size_t * quantity)
 {
 	int min = 0 , max = _message.options.size(), mid  = 0;
@@ -305,6 +325,24 @@ const packet::option_t * packet::find_options(const std::uint8_t number, size_t 
 	}
 	return nullptr;
 }
+
+void packet::add_option(option_number_t number, const std::uint8_t * value, const size_t length)
+{	
+	assert(value != nullptr);
+	assert(number <= OPTION_MAX_NUMBER);
+	assert(length <= OPTION_MAX_LENGTH);
+	option_t option;
+	option.header.asByte = 0;
+	option.number = static_cast<std::uint8_t>(number);
+	for(size_t i = 0; i < length; i++)
+	{
+		option.value.push_back(value[i]);
+	}	
+	_message.options.push_back(option);
+	std::sort(_message.options.begin(), _message.options.end());
+	set_option_bitmap(number);
+}
+
 
 std::uint8_t packet::get_option_nibble(uint32_t value)
 {

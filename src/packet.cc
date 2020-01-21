@@ -271,22 +271,20 @@ bool packet::parse(const std::uint8_t * buffer, const size_t length)
 	return returnCode;
 }
 
-void packet::set_option_bitmap (option_number_t number)
+void packet::set_option_bitmap (std::uint8_t number)
 {
-	std::uint8_t tmp = static_cast<uint8_t>(number);
-	if (tmp > 31)
-		_option_bitmap[1] |= (1 << (tmp - 32));
+	if (number > 31)
+		_option_bitmap[1] |= (1 << (number - 32));
 	else
-		_option_bitmap[0] |= (1 << tmp);
+		_option_bitmap[0] |= (1 << number);
 }
 
-bool packet::is_option_set(option_number_t number)
+bool packet::is_option_set(std::uint8_t number)
 {
-	std::uint8_t tmp = static_cast<uint8_t>(number);
-	if (tmp > 31)
-		return _option_bitmap[1] & (1 << (tmp - 32));
+	if (number > 31)
+		return _option_bitmap[1] & (1 << (number - 32));
 	else
-		return _option_bitmap[0] & (1 << tmp);
+		return _option_bitmap[0] & (1 << number);
 }
 
 
@@ -325,24 +323,6 @@ const packet::option_t * packet::find_options(const std::uint8_t number, size_t 
 	}
 	return nullptr;
 }
-
-void packet::add_option(option_number_t number, const std::uint8_t * value, const size_t length)
-{	
-	assert(value != nullptr);
-	assert(number <= OPTION_MAX_NUMBER);
-	assert(length <= OPTION_MAX_LENGTH);
-	option_t option;
-	option.header.asByte = 0;
-	option.number = static_cast<std::uint8_t>(number);
-	for(size_t i = 0; i < length; i++)
-	{
-		option.value.push_back(value[i]);
-	}	
-	_message.options.push_back(option);
-	std::sort(_message.options.begin(), _message.options.end());
-	set_option_bitmap(number);
-}
-
 
 std::uint8_t packet::get_option_nibble(uint32_t value)
 {
@@ -436,10 +416,10 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length, bool checkBufferS
 		lengthNibble = get_option_nibble(static_cast<std::uint32_t>(opt.value.size()));
 
 		if (!checkBufferSizeOnly) {
-        	buffer [offset++] = (deltaNibble << 4 | lengthNibble) & 0xFF;
-        	assert(offset < *length);
-    	}
-    	else offset++;
+		buffer [offset++] = (deltaNibble << 4 | lengthNibble) & 0xFF;
+		assert(offset < *length);
+		}
+		else offset++;
 
 		option_maker (deltaNibble, optDelta);
 		option_maker (lengthNibble, static_cast<std::uint8_t>(opt.value.size()));
@@ -479,23 +459,43 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length, bool checkBufferS
 	return true;
 }
 
-void packet::prepare_answer(message_type_t messageType,
-						std::uint16_t messageId,
-						message_code_t responseCode,
-						const std::uint8_t * payload,
-						const size_t payloadLength,
-						media_type_t payloadType)
+inline void packet::clean_options()
+{
+	_message.options.clear();
+	_option_bitmap[0] = 0;
+	_option_bitmap[1] = 0;
+}
+/* value should be written in network byte order */
+void packet::add_option(option_number_t number, const std::uint8_t * value, const size_t length)
+{
+	assert(value != nullptr);
+	assert(number <= OPTION_MAX_NUMBER);
+	assert(length <= OPTION_MAX_LENGTH);
+	option_t option;
+	option.header.asByte = 0;
+	option.number = static_cast<std::uint8_t>(number);
+	for(size_t i = 0; i < length; i++)
+	{
+		option.value.push_back(value[i]);
+	}
+	_message.options.push_back(option);
+	std::sort(_message.options.begin(), _message.options.end());
+	set_option_bitmap(option.number);
+}
+
+void packet::prepare_answer(message_type_t messageType, std::uint16_t messageId, message_code_t responseCode,
+								const std::uint8_t * payload, const size_t payloadLength)
 {
 	assert(payload != nullptr);
 	set_message_version(COAP_VERSION);
 	set_message_type(static_cast<std::uint8_t>(messageType));
 	set_message_messageId(messageId);
 	set_message_code(static_cast<std::uint8_t>(responseCode));
-	_message.options.clear();
-	_message.options[0].number = static_cast<std::uint8_t>(CONTENT_FORMAT);
-	_message.options[0].value[0] = (static_cast<std::uint16_t>(payloadType) & 0xFF00) >> 8;
-	_message.options[0].value[1] = (static_cast<std::uint16_t>(payloadType) & 0x00FF);
-	std::memcpy(_message.payload.data(), payload, payloadLength);
+	_message.payload.clear();
+	for (size_t i = 0; i < payloadLength; i++)
+	{
+		_message.payload.push_back(payload[i]);
+	}
 }
 
 }//coap

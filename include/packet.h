@@ -225,8 +225,8 @@ private:
 	};
 
 private:
-	void set_option_bitmap (option_number_t number);
-	bool is_option_set(option_number_t number);
+	void set_option_bitmap (std::uint8_t number);
+	bool is_option_set(std::uint8_t number);
 
 public:
 	message_t _message;
@@ -243,22 +243,12 @@ public:
 
 	bool parse(const std::uint8_t * buffer, const size_t length);
 	bool serialize(std::uint8_t * buffer, size_t * length, bool checkBufferSizeOnly);
-	void prepare_answer(message_type_t messageType,
-					std::uint16_t messageId,
-					message_code_t responseCode,
-					const std::uint8_t * payload,
-					const size_t payloadLength,
-					media_type_t payloadType);
+	inline void clean_options();
+	void add_option(option_number_t number, const std::uint8_t * value, const size_t length);
+	void prepare_answer(message_type_t messageType, std::uint16_t messageId, message_code_t responseCode,
+									const std::uint8_t * payload, const size_t payloadLength)
 
 	const option_t * find_options(const std::uint8_t number, size_t * quantity);
-	void add_option(option_number_t number, const std::uint8_t * value, const size_t length);
-
-	void clean_options()
-	{
-		_message.options.clear();
-		_option_bitmap[0] = 0;
-		_option_bitmap[1] = 0;
-	}
 
 	std::uint32_t * get_option_bitmap()
 	{

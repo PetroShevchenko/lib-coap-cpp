@@ -10,16 +10,11 @@
 
 namespace coap {
 
-enum {
-	MAX_CLIENT_BUFFER_SIZE = 1024
-};
-
 error clientConnection::_error;
 
 clientConnection::clientConnection(std::string address, int port):connection(address,port)
 {
 	_serverAddress = new struct sockaddr_in;
-    _buffer = new uint8_t [MAX_CLIENT_BUFFER_SIZE];  
     _serverAddress->sin_family = AF_INET;                                                                                                                                                                                                                                                        
     _serverAddress->sin_port = htons(_port);
     inet_aton (_address.c_str(), (in_addr*)&serverAddress->sin_addr.s_addr);      	
@@ -28,7 +23,6 @@ clientConnection::clientConnection(std::string address, int port):connection(add
 clientConnection::~clientConnection()
 {
 	delete _serverAddress;
-	delete [] _buffer;
 	LOG_DELETE;	
 }
 
@@ -36,7 +30,7 @@ bool clientConnection::fill_buffer(std::uint8_t * data, size_t size)
 {
 	if (data == nullptr
 		|| size == 0
-		|| size > MAX_CLIENT_BUFFER_SIZE) {
+		|| size > BUFFER_MAX_SIZE) {
 		LOG(ERROR, "Wrong argument : data =", data, " ,size = ", size);
 		_error.set_code(WRONG_ARGUMENT);
 		return false;
@@ -49,9 +43,9 @@ bool clientConnection::fill_buffer(std::uint8_t * data, size_t size)
 
 bool clientConnection::establish()
 {
-	_socket = socket (AF_INET, SOCK_DGRAM, 0);                                                                                                                                                                                                                                                                       
+	_descriptor = socket (AF_INET, SOCK_DGRAM, 0);                                                                                                                                                                                                                                                                       
 
-    if (_socket < 0) {
+    if (_descriptor < 0) {
     	LOG(ERROR,"Can not create a new socket");                                                                                                                                                                                                                                                                                               
         _error.set_code(CREATE_SOCKET);                                                                                                                                                                                                                                                                    
         return false;                                                                                                                                                                                                                                                                                                
@@ -62,7 +56,7 @@ bool clientConnection::establish()
 
 bool clientConnection::disconnect()
 {
-    close(_socket);
+    close(_descriptor);
     LOG(INFO,"The socket was closed");
     return true;	
 }
@@ -70,7 +64,7 @@ bool clientConnection::disconnect()
 bool clientConnection::send()
 {
 	ssize_t sent;
-	sent = sendto (_socket, _buffer, _length, MSG_CONFIRM, const_cast<struct sockaddr *>(_serverAddress), sizeof(*_serverAddress));
+	sent = sendto (_descriptor, _buffer, _length, MSG_CONFIRM, const_cast<struct sockaddr *>(_serverAddress), sizeof(*_serverAddress));
 	if (sent != _length) {
 		LOG(ERROR,"The buffer was incompletly sent, length = ", _length, " , sent = ", sent);
 		_error.set_error(INCOMPLETE_SEND);
@@ -86,8 +80,8 @@ bool clientConnection::receive()
 	socklen_t addressLength;
 	struct sockaddr clientAddress;
  	
- 	memset (_buffer, 0 , MAX_CLIENT_BUFFER_SIZE);
-	received = recvfrom (_socket, static_cast<char *>(_buffer), MAX_CLIENT_BUFFER_SIZE,
+ 	memset (_buffer, 0 , BUFFER_MAX_SIZE);
+	received = recvfrom (_descriptor, static_cast<char *>(_buffer), BUFFER_MAX_SIZE,
 							MSG_WAITALL, static_cast<struct sockaddr *>(&clientAddress), &addressLength);
 	if (received == -1) {
 		LOG(ERROR, "Receive error");

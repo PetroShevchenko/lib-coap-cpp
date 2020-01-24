@@ -1,20 +1,12 @@
 cmake_minimum_required (VERSION 3.5)
 
-set(PROJECT_NAME "test_app")
-set(SRC_LIST tests/test_packet.cc
-				src/packet.cc
-				src/uri.cc
-				src/context.cc)
-
-
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wshadow -Wundef -Wno-missing-field-initializers")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb")
 
-project (${PROJECT_NAME})
-
 include_directories(include)
 
-add_executable(${PROJECT_NAME} ${SRC_LIST})
+include(scripts/cmake/library.cmake)
+include(scripts/cmake/tests.cmake)

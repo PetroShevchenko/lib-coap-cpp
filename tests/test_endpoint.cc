@@ -1,5 +1,6 @@
 #include "log.h"
 #include "endpoint.h"
+#include "uriEndpoint.h"
 
 LOG_USING_NAMESPACE
 

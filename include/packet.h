@@ -243,10 +243,9 @@ public:
 
 	bool parse(const std::uint8_t * buffer, const size_t length);
 	bool serialize(std::uint8_t * buffer, size_t * length, bool checkBufferSizeOnly);
-	inline void clean_options();
 	void add_option(option_number_t number, const std::uint8_t * value, const size_t length);
 	void prepare_answer(message_type_t messageType, std::uint16_t messageId, message_code_t responseCode,
-									const std::uint8_t * payload, const size_t payloadLength)
+									const std::uint8_t * payload, const size_t payloadLength);
 
 	const option_t * find_options(const std::uint8_t number, size_t * quantity);
 
@@ -269,6 +268,13 @@ public:
 		//test = htons(test);
 		//return (test & 0xFF) == 0x5A ? true : false;
 		return false;
+	}
+
+	void clean_options()
+	{
+		_message.options.clear();
+		_option_bitmap[0] = 0;
+		_option_bitmap[1] = 0;
 	}
 
 	bool get_is_little_endian() const

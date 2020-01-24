@@ -459,12 +459,6 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length, bool checkBufferS
 	return true;
 }
 
-inline void packet::clean_options()
-{
-	_message.options.clear();
-	_option_bitmap[0] = 0;
-	_option_bitmap[1] = 0;
-}
 /* value should be written in network byte order */
 void packet::add_option(option_number_t number, const std::uint8_t * value, const size_t length)
 {

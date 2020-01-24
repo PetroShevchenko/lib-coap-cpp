@@ -122,7 +122,7 @@ int main()
 
 		const std::uint8_t payload[] = "{""result"": ""Hello JSON-RPC"", ""error"": null, ""id"":1}";
 
-		instance.prepare_answer (ACKNOWLEDGEMENT, ++messageId, CONTENT, payload, sizeof(payload), JSON);
+		instance.prepare_answer (ACKNOWLEDGEMENT, ++messageId, CONTENT, payload, sizeof(payload));
 
 		if (!instance.serialize (nullptr, &length, true)) {
 			LOG(ERROR, "unable to check buffer size, corrupted message");

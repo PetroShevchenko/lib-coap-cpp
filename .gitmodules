@@ -7,3 +7,9 @@
 [submodule "ArduinoSTL"]
 	path = examples/boards/ARDUINO-MEGA-2560/ArduinoSTL
 	url = https://github.com/mike-matera/ArduinoSTL.git
+[submodule "esp-idf"]
+	path = examples/boards/ESP-WROOM-32/esp-idf
+	url = https://github.com/espressif/esp-idf.git
+[submodule "mbed-os"]
+	path = examples/boards/NUCLEO-F429ZI/mbed-os-coap-client/mbed-os
+	url = https://github.com/ARMmbed/mbed-os.git

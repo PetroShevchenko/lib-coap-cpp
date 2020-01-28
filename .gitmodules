@@ -1,0 +1,6 @@
+[submodule "libs/third-party/jansson"]
+	path = libs/third-party/jansson
+	url = https://github.com/akheron/jansson.git
+[submodule "libs/third-party/wolfssl"]
+	path = libs/third-party/wolfssl
+	url = https://github.com/wolfSSL/wolfssl.git

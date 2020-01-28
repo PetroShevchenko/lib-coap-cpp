@@ -5,8 +5,12 @@
 DOCKER_FILE := dockerfile.fedora
 
 build:
-	mkdir -p build
-	cd build &&	cmake .. && make -j$(shell nproc)
+	mkdir -p build/lib
+	cd build/lib &&	cmake ../.. && make -j$(shell nproc)
+
+examples-build:
+	mkdir -p build/examples
+	cd build/examples && cmake ../../examples/POSIX && make -j$(shell nproc)
 
 docker-build: scripts/docker/$(DOCKER_FILE)
 	cd scripts/docker && docker build -t lib-coap-cpp-image --rm -f $(DOCKER_FILE) ../..

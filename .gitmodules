@@ -4,3 +4,6 @@
 [submodule "libs/third-party/wolfssl"]
 	path = libs/third-party/wolfssl
 	url = https://github.com/wolfSSL/wolfssl.git
+[submodule "ArduinoSTL"]
+	path = examples/boards/ARDUINO-MEGA-2560/ArduinoSTL
+	url = https://github.com/mike-matera/ArduinoSTL.git

@@ -1,40 +1,30 @@
 #ifndef ENDPOINT_H
 #define ENDPOINT_H
+#include <vector>
+#include <functional>
+#include <string>
+#include <cassert>
 #include "log.h"
 #include "uri.h"
 #include "packet.h"
-#include <functional>
-#include <string>
+#include "connection.h"
 
 namespace coap {
 
 class endpoint {
 
 public:
-	using callback_t = std::function<void(void)>;
+	virtual void registration_step() = 0;
+	virtual void transaction_step() = 0;
 
 protected:
-	using handler_t =
-	struct handler_s {
-		method_code_t code;
-		callback_t callback;
-		std::string attribute;
-	};
-
 	LOG_CREATE(ALL,std::clog);
-
 	std::string _name;
-	handler_t _handler[METHODS_COUNT];
+	std::vector<connection *> _connections;
 
 public:
-	endpoint (std::string name, endpoint::callback_t callbacks[METHODS_COUNT], std::string attributes[METHODS_COUNT] ):  _name(name)
+	endpoint (std::string name):  _name(name)
 	{
-		for(size_t i = 0; i < METHODS_COUNT; i++)
-		{
-			_handler[i].code = static_cast<method_code_t>(i);
-			_handler[i].callback = std::move(callbacks[i]);
-			_handler[i].attribute = std::move(attributes[i]);
-		}
 	}
 
 	virtual ~endpoint()
@@ -43,6 +33,11 @@ public:
 	}
 	endpoint(const endpoint &) = delete;
 	endpoint & operator=(const endpoint &) = delete;
+	void add_connection(connection * newConnection)
+	{
+		assert(newConnection);
+		_connections.push_back(newConnection);
+	}
 };
 
 }//coap

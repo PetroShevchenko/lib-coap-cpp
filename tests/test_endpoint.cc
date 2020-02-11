@@ -1,6 +1,5 @@
 #include "log.h"
-#include "endpoint.h"
-#include "uriEndpoint.h"
+#include "uriServerEndpoint.h"
 
 LOG_USING_NAMESPACE
 
@@ -14,7 +13,7 @@ int main()
 		LOG(DEBUG,"It is test_func");
 	};
 
-	endpoint::callback_t callbacks [METHODS_COUNT] = {
+	uriServerEndpoint::callback_t callbacks [METHODS_COUNT] = {
 		test_func,
 		test_func,
 		test_func,
@@ -30,7 +29,7 @@ int main()
 
 	try {
 
-		uriEndpoint ep1("/first/second/third/forth",callbacks, attributes);
+		uriServerEndpoint ep1("/first/second/third/forth",callbacks, attributes);
 		LOG(DEBUG, ep1.get_uri());
 
 	}

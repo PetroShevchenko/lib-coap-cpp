@@ -34,8 +34,7 @@ private:
 	static contextDestroyer _destroyer;
 	static error _error;
 
-	std::vector<endpoint> _endpoints;
-	std::vector<connection> _connections;
+	std::vector<endpoint *> _endpoints;
 
 public:
 	context(const context &) = delete;
@@ -43,6 +42,10 @@ public:
 
 	static context & createInstance();
 	static bool clearInstance(context &);
+
+	void add_endpoint(endpoint *);
+	void registration_process();
+	void transaction_process();
 };
 
 

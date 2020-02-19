@@ -44,7 +44,6 @@ bool connection::isIPv6Address(std::string address)
 {
 	std::size_t position = 0, prev_pos = 0;
 	std::size_t colons = 0, double_colons = 0;
-
 	auto is_hex = [&](std::size_t start_index, std::size_t end_index)->bool
 	{
 		bool result;
@@ -63,9 +62,7 @@ bool connection::isIPv6Address(std::string address)
 		}
 		return result;
 	};
-
 	if (address.size() > 39) return false;
-
 	while(position < address.size())
 	{
 		position = address.find(":", prev_pos);

@@ -1,6 +1,29 @@
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+
 #include "connection.h"
 
 namespace coap {
+
+bool connection::checkNumberSystem (std::size_t start_index, std::size_t end_index, 
+									std::string &number_string, const std::string &pattern)
+{
+	bool result;
+	for(size_t i = start_index; i <= end_index; i++)
+	{
+		result = false;
+		for(auto sym : pattern)
+		{
+			if (sym == number_string[i]) {
+				result = true;
+				break;
+			}
+		}
+		if(!result) return result;
+	}
+	return result;
+};
 
 bool connection::isIPv4Address(std::string address)
 {
@@ -8,21 +31,8 @@ bool connection::isIPv4Address(std::string address)
 	std::size_t iterations = 3;
 	auto is_dec = [&](std::size_t start_index, std::size_t end_index)->bool
 	{
-		bool result;
 		const std::string pattern = "0123456789";
-		for(size_t i = start_index; i <= end_index; i++)
-		{
-			result = false;
-			for(auto sym : pattern)
-			{
-				if (sym == address[i]) {
-					result = true;
-					break;
-				}
-			}
-			if(!result) return result;
-		}
-		return result;
+		return checkNumberSystem(start_index, end_index, address, pattern);
 	};
 	if (address.size() > 15) return false;
 	while (iterations--)
@@ -34,7 +44,7 @@ bool connection::isIPv4Address(std::string address)
 			!is_dec(prev_pos, position - 1)) return false;
 		prev_pos = ++position;
 	}
-	if (address.size() - position > 4 ||
+	if (address.size() - prev_pos > 3 ||
 		std::string::npos != address.find(".", prev_pos ) ||
 		!is_dec(prev_pos, address.size() - 1)) return false;
 	return true;
@@ -46,21 +56,8 @@ bool connection::isIPv6Address(std::string address)
 	std::size_t colons = 0, double_colons = 0;
 	auto is_hex = [&](std::size_t start_index, std::size_t end_index)->bool
 	{
-		bool result;
 		const std::string pattern = "0123456789aAbBcCdDeEfF";
-		for(size_t i = start_index; i <= end_index; i++)
-		{
-			result = false;
-			for(auto sym : pattern)
-			{
-				if (sym == address[i]) {
-					result = true;
-					break;
-				}
-			}
-			if(!result) return result;
-		}
-		return result;
+		return checkNumberSystem(start_index, end_index, address, pattern);
 	};
 	if (address.size() > 39) return false;
 	while(position < address.size())
@@ -98,6 +95,21 @@ bool connection::isIPv6Address(std::string address)
 		}
 	}
 	return true;
+}
+
+bool connection::hostname2IPAddress()
+{
+	if (_hostname.size() == 0) return false;
+	if (isIPv6Address(_hostname)) {
+		_IPv6Address = _hostname;
+		return true;
+	}
+	if (isIPv4Address(_hostname)) {
+		_IPv4Address = _hostname;
+		return true;
+	}
+	//TODO
+	return false;
 }
 
 }//coap

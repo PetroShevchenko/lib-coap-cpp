@@ -26,9 +26,7 @@ public:
 		TIMEOUT_EXPIRED,
 		ERROR_HAS_OCCURED
 	};
-    bool isIPv4Address(std::string address);
-    bool isIPv6Address(std::string address);
-    virtual bool hostname2IPAddress() {return false;}
+
 
 protected:
 	std::string _hostname;
@@ -39,6 +37,8 @@ protected:
     std::uint8_t * _buffer;
     size_t _length;
     state_t _state;
+	static bool checkNumberSystem(std::size_t start_index, std::size_t end_index, 
+									std::string &number_string, const std::string &pattern);
 
 public:
 	connection(std::string hostname, int port): 
@@ -56,6 +56,10 @@ public:
 	virtual bool disconnect() {return false;}
 	virtual bool send() {return false;}
 	virtual bool receive() {return false;}
+    virtual bool hostname2IPAddress();
+
+	bool isIPv4Address(std::string address);
+    bool isIPv6Address(std::string address);
 
 	std::string get_hostname() const
 	{

@@ -24,6 +24,8 @@ int main()
 	LOG(DEBUG, "Test 7 for IPv4 111.111.25.25.98 : ", udpConn.isIPv4Address("111.111.25.25.98"));
 	LOG(DEBUG, "Test 8 for IPv4 0.0.0.0.0 : ", udpConn.isIPv4Address("0.0.0.0.0"));
 	LOG(DEBUG, "Test 9 for IPv4 1.1.1.1000 : ", udpConn.isIPv4Address("1.1.1.1000"));
+	LOG(DEBUG, "Test 10 for IPv4 1.1.1.10a : ", udpConn.isIPv4Address("1.1.1.10a"));
+
 
 	LOG(DEBUG, "Test 1 for IPv6 [::78a] : ", udpConn.isIPv6Address("::78a"));
 	LOG(DEBUG, "Test 2 for IPv6 [::78g] : ", udpConn.isIPv6Address("::78g"));

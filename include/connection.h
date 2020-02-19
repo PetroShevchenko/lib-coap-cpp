@@ -32,7 +32,8 @@ public:
 
 protected:
 	std::string _hostname;
-    std::vector <std::string> _addresses;
+    std::string _IPv4Address;
+    std::string _IPv6Address;
     int _port;
     int _descriptor;
     std::uint8_t * _buffer;

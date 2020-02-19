@@ -6,15 +6,37 @@ bool connection::isIPv4Address(std::string address)
 {
 	std::size_t position = 0, prev_pos = 0;
 	std::size_t iterations = 3;
+	auto is_dec = [&](std::size_t start_index, std::size_t end_index)->bool
+	{
+		bool result;
+		const std::string pattern = "0123456789";
+		for(size_t i = start_index; i <= end_index; i++)
+		{
+			result = false;
+			for(auto sym : pattern)
+			{
+				if (sym == address[i]) {
+					result = true;
+					break;
+				}
+			}
+			if(!result) return result;
+		}
+		return result;
+	};
 	if (address.size() > 15) return false;
 	while (iterations--)
-	{		
-		position = address.find(".", position ? prev_pos = position + 1 : prev_pos = position);
-		if (position == std::string::npos || 
-			position == 0 || position > (prev_pos + 3) ) return false;
+	{
+		position = address.find(".", prev_pos);
+		if (position == std::string::npos ||
+			position == 0 ||
+			position > (prev_pos + 3) ||
+			!is_dec(prev_pos, position - 1)) return false;
+		prev_pos = ++position;
 	}
 	if (address.size() - position > 4 ||
-		std::string::npos != address.find(".", position + 1 )) return false;
+		std::string::npos != address.find(".", prev_pos ) ||
+		!is_dec(prev_pos, address.size() - 1)) return false;
 	return true;
 }
 
@@ -31,7 +53,7 @@ bool connection::isIPv6Address(std::string address)
 		{
 			result = false;
 			for(auto sym : pattern)
-			{	
+			{
 				if (sym == address[i]) {
 					result = true;
 					break;
@@ -54,7 +76,7 @@ bool connection::isIPv6Address(std::string address)
 				(address.size() - prev_pos > 4) ||
 				!is_hex(prev_pos, address.size() - 1))
 				return false;
-			else 
+			else
 				break;
 		}
 		else {
@@ -62,19 +84,19 @@ bool connection::isIPv6Address(std::string address)
 				if ((position - prev_pos > 4) ||
 					!is_hex(prev_pos, position - 1))
 					return false;
-			}			
+			}
 			position++;
 			if(address[position] == ':') {
 				double_colons++;
-				position++; 
+				position++;
 				if (position == address.size()) break;
 			}
 			else {
 				colons++;
-				if (position == address.size()) 
+				if (position == address.size())
 					return false;
 			}
-			
+
 			prev_pos = position;
 		}
 	}

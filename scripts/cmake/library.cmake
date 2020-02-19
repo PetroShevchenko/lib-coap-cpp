@@ -1,5 +1,6 @@
 set(LIB_PROJECT_NAME "coapcpp")
 set(LIB_SRC_LIST src/context.cc
+				src/connection.cc
 				src/packet.cc
 				src/uri.cc
 				src/uriClientEndpoint.cc

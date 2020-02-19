@@ -16,7 +16,7 @@ protected:
 	static error _error;
 
 public:
-	clientConnection(std::string address, int port);
+	clientConnection(std::string hostname, int port);
 	~clientConnection();
 	bool establish();
 	bool disconnect();

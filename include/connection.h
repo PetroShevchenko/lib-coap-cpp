@@ -4,6 +4,7 @@
 #include <string>
 #include <cstddef>
 #include <iostream>
+#include <vector>
 
 namespace coap{
 
@@ -25,9 +26,13 @@ public:
 		TIMEOUT_EXPIRED,
 		ERROR_HAS_OCCURED
 	};
+    bool isIPv4Address(std::string address);
+    bool isIPv6Address(std::string address);
+    virtual bool hostname2IPAddress() {return false;}
 
 protected:
-    std::string _address;
+	std::string _hostname;
+    std::vector <std::string> _addresses;
     int _port;
     int _descriptor;
     std::uint8_t * _buffer;
@@ -35,8 +40,8 @@ protected:
     state_t _state;
 
 public:
-	connection(std::string address, int port): 
-	_address(address), _port(port), _descriptor(0), _state(connection::DISCONNECTED)
+	connection(std::string hostname, int port): 
+	_hostname(hostname), _port(port), _descriptor(0), _state(connection::DISCONNECTED)
 	{
 		_length = BUFFER_MAX_SIZE;
 		_buffer = new uint8_t [_length];
@@ -46,14 +51,14 @@ public:
 		delete [] _buffer;
 	}
 
-	virtual bool establish(){return false;}
-	virtual bool disconnect(){return false;}
-	virtual bool send(){return false;}
-	virtual bool receive(){return false;}
+	virtual bool establish() {return false;}
+	virtual bool disconnect() {return false;}
+	virtual bool send() {return false;}
+	virtual bool receive() {return false;}
 
-	std::string get_address() const
+	std::string get_hostname() const
 	{
-		return _address;
+		return _hostname;
 	}
 	int get_port() const
 	{

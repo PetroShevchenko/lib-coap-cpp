@@ -16,14 +16,14 @@ namespace coap {
 
 error clientConnection::_error;
 
-clientConnection::clientConnection(std::string address, int port)
-:connection(address,port)
+clientConnection::clientConnection(std::string hostname, int port)
+:connection(hostname,port)
 {
 	_serverAddress = new struct sockaddr_in;
     _serverAddress->sin_family = AF_INET;                                                                                                                                                                                                                                                        
     _serverAddress->sin_port = htons(_port);
     struct in_addr * inp =  (in_addr *)(&_serverAddress->sin_addr.s_addr);
-    inet_aton (_address.c_str(), inp);
+    inet_aton (_hostname.c_str(), inp);
 }
 
 clientConnection::~clientConnection()

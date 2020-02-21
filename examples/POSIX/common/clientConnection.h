@@ -10,9 +10,10 @@ class clientConnection : public connection {
 
 private:
 	LOG_CREATE(ALL,std::clog);
-	
+
 protected:
-	struct sockaddr_in * _serverAddress;
+	struct sockaddr_in * _serverIPv4Address;
+	struct sockaddr_in6 * _serverIPv6Address;
 	static error _error;
 
 public:
@@ -22,7 +23,7 @@ public:
 	bool disconnect();
 	bool send();
 	bool receive();
-	bool fill_buffer(std::uint8_t *, size_t);	
+	bool fill_buffer(std::uint8_t *, size_t);
 };
 
 }//coap

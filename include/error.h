@@ -20,6 +20,7 @@ enum
 	CREATE_SOCKET,
 	INCOMPLETE_SEND,
 	RECEIVE,
+	RESOLVE_ADDRESS,
 	UNKNOWN
 };
 #define ERROR_CODE_MIN OK
@@ -44,6 +45,7 @@ protected:
 		"Can not create socket",
 		"The buffer was incompletely sent",
 		"Receive error",
+		"Unable to resolve IP address",
 		"Unknown error"
 	};
 

@@ -1,12 +1,15 @@
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 #include <netdb.h>
+#include <cstdlib>
+#include <cstring>
 
 #include "connection.h"
 
 namespace coap {
 
-bool connection::checkNumberSystem (std::size_t start_index, std::size_t end_index, 
+bool connection::checkNumberSystem (std::size_t start_index, std::size_t end_index,
 									std::string &number_string, const std::string &pattern)
 {
 	bool result;
@@ -23,7 +26,7 @@ bool connection::checkNumberSystem (std::size_t start_index, std::size_t end_ind
 		if(!result) return result;
 	}
 	return result;
-};
+}
 
 bool connection::isIPv4Address(std::string address)
 {
@@ -31,8 +34,7 @@ bool connection::isIPv4Address(std::string address)
 	std::size_t iterations = 3;
 	auto is_dec = [&](std::size_t start_index, std::size_t end_index)->bool
 	{
-		const std::string pattern = "0123456789";
-		return checkNumberSystem(start_index, end_index, address, pattern);
+		return checkNumberSystem(start_index, end_index, address, "0123456789");
 	};
 	if (address.size() > 15) return false;
 	while (iterations--)
@@ -56,8 +58,7 @@ bool connection::isIPv6Address(std::string address)
 	std::size_t colons = 0, double_colons = 0;
 	auto is_hex = [&](std::size_t start_index, std::size_t end_index)->bool
 	{
-		const std::string pattern = "0123456789aAbBcCdDeEfF";
-		return checkNumberSystem(start_index, end_index, address, pattern);
+		return checkNumberSystem(start_index, end_index, address, "0123456789aAbBcCdDeEfF");
 	};
 	if (address.size() > 39) return false;
 	while(position < address.size())
@@ -99,6 +100,13 @@ bool connection::isIPv6Address(std::string address)
 
 bool connection::hostname2IPAddress()
 {
+	struct addrinfo hints;
+	struct addrinfo * servinfo = nullptr;
+	char port_str[8];
+	char address_str[40];
+	int result;
+	bool status = false;
+
 	if (_hostname.size() == 0) return false;
 	if (isIPv6Address(_hostname)) {
 		_IPv6Address = _hostname;
@@ -108,8 +116,36 @@ bool connection::hostname2IPAddress()
 		_IPv4Address = _hostname;
 		return true;
 	}
-	//TODO
-	return false;
+	memset(address_str, 0, sizeof(address_str));
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_DGRAM;
+	snprintf((char *)port_str, sizeof(port_str), "%d", _port);
+
+	result = getaddrinfo(_hostname.c_str(), port_str, &hints, &servinfo);
+
+	if (result == 0) {
+		for (struct addrinfo * p = servinfo; p != nullptr; p = p->ai_next)
+		{
+			inet_ntop(p->ai_family, p->ai_family == AF_INET ?
+					(void *) & ((struct sockaddr_in *) p->ai_addr)->sin_addr :
+					(void *) & ((struct sockaddr_in6 *) p->ai_addr)->sin6_addr, address_str, sizeof(address_str));
+			if (p->ai_family == AF_INET6) {
+				_IPv6Address = address_str;
+				status = true;
+			}
+			else if (p->ai_family == AF_INET) {
+				_IPv4Address = address_str;
+				status = true;
+			}
+		}
+	}
+	else status = false;
+
+	if (servinfo != nullptr) {
+		freeaddrinfo(servinfo);
+	}
+	return status;
 }
 
 }//coap

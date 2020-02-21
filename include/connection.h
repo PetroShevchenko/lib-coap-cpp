@@ -10,12 +10,12 @@ namespace coap{
 
 enum {
 	BUFFER_MAX_SIZE = 1024
-};	
+};
 
 class connection {
 
 public:
-	using state_t = 
+	using state_t =
 	enum state_e {
 		DISCONNECTED,
 		CONNECTED,
@@ -37,11 +37,11 @@ protected:
     std::uint8_t * _buffer;
     size_t _length;
     state_t _state;
-	static bool checkNumberSystem(std::size_t start_index, std::size_t end_index, 
+	static bool checkNumberSystem(std::size_t start_index, std::size_t end_index,
 									std::string &number_string, const std::string &pattern);
 
 public:
-	connection(std::string hostname, int port): 
+	connection(std::string hostname, int port):
 	_hostname(hostname), _port(port), _descriptor(0), _state(connection::DISCONNECTED)
 	{
 		_length = BUFFER_MAX_SIZE;
@@ -84,6 +84,14 @@ public:
 	state_t get_state() const
 	{
 		return _state;
+	}
+	std::string get_IPv4Address() const
+	{
+		return _IPv4Address;
+	}
+	std::string get_IPv6Address() const
+	{
+		return _IPv6Address;
 	}
 };
 

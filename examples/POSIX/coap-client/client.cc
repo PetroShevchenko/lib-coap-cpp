@@ -33,16 +33,6 @@ static bool use_interactive_mode = true;
 static std::string ip_address = ipv6_address_default;
 static std::string command_file_name = command_file_name_default;
 
-static inline bool check_ipv6(std::string &ipv6)
-{
-//TODO
-}
-
-static inline bool check_ipv4(std::string &ipv6)
-{
-//TODO	
-}
-
 static void usage()
 {
 	std::cerr << "Usage: coap-client [OPTIONS]" << std::endl;

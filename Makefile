@@ -1,10 +1,14 @@
 .PHONY: build examples docker-run install clean
 
+TARGET := POSIX
+#TARGET := RASPBERRY-PI-3
+#TARGET := STM32H747I-DISCO
+
 #DOCKER_FILE := dockerfile.ubuntu
 #DOCKER_FILE := dockerfile.debian
 DOCKER_FILE := dockerfile.fedora
 
-build:
+lib:
 	mkdir -p build/lib
 	cd build/lib &&	cmake ../.. && make -j$(shell nproc)
 

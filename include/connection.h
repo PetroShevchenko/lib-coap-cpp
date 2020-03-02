@@ -51,14 +51,14 @@ public:
 	{
 		delete [] _buffer;
 	}
-
+    
 	virtual bool establish() {return false;}
 	virtual bool disconnect() {return false;}
 	virtual bool send() {return false;}
 	virtual bool receive() {return false;}
     virtual bool hostname2IPAddress(){return false;}
 
-	bool isIPv4Address(std::string address);
+    bool isIPv4Address(std::string address);
     bool isIPv6Address(std::string address);
 
 	std::string get_hostname() const

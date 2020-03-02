@@ -12,8 +12,9 @@ private:
 	LOG_CREATE(ALL,std::clog);
 
 protected:
-	struct sockaddr_in * _serverIPv4Address;
 	struct sockaddr_in6 * _serverIPv6Address;
+	struct sockaddr_in * _serverIPv4Address;
+
 	static error _error;
 
 public:
@@ -24,6 +25,7 @@ public:
 	bool send();
 	bool receive();
 	bool fill_buffer(std::uint8_t *, size_t);
+	bool hostname2IPAddress();
 };
 
 }//coap

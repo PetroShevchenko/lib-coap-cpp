@@ -9,9 +9,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <unistd.h>
-#include "connection.h"
+#include "coapcpp.h"
 #include "clientConnection.h"
-#include "log.h"
 
 namespace coap {
 
@@ -145,11 +144,11 @@ bool clientConnection::hostname2IPAddress()
 	bool status = false;
 
 	if (_hostname.size() == 0) return false;
-	if (isIPv6Address(_hostname)) {
+	if (connection::isIPv6Address(_hostname)) {
 		_IPv6Address = _hostname;
 		return true;
 	}
-	if (isIPv4Address(_hostname)) {
+	if (connection::isIPv4Address(_hostname)) {
 		_IPv4Address = _hostname;
 		return true;
 	}

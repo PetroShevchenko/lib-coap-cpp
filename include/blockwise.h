@@ -4,6 +4,8 @@
 #include "error.h"
 #include <vector>
 
+namespace coap {
+
 class blockwise {
 private:
 	LOG_CREATE(ALL,std::clog);
@@ -29,6 +31,6 @@ private:
 public:
 
 };
-
+}//coap
 
 #endif

@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.5)
 
-project(coap-client CXX)
+set(${PROJECT_NAME} coap-client)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
@@ -14,5 +14,7 @@ set(SRC_LIST ${CMAKE_CURRENT_LIST_DIR}/../common/clientConnection.cc
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../common)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../../../include)
 
+project(${PROJECT_NAME})
+
 add_executable(${PROJECT_NAME} ${SRC_LIST})
-target_link_libraries(${PROJECT_NAME} ${LIB_PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/../../../build/lib/libcoapcpp.a)

@@ -26,7 +26,8 @@ public:
 		TIMEOUT_EXPIRED,
 		ERROR_HAS_OCCURED
 	};
-
+	static bool isIPv4Address(std::string address);
+	static bool isIPv6Address(std::string address);
 
 protected:
 	std::string _hostname;
@@ -51,15 +52,12 @@ public:
 	{
 		delete [] _buffer;
 	}
-    
-	virtual bool establish() {return false;}
-	virtual bool disconnect() {return false;}
-	virtual bool send() {return false;}
-	virtual bool receive() {return false;}
-    virtual bool hostname2IPAddress(){return false;}
 
-    bool isIPv4Address(std::string address);
-    bool isIPv6Address(std::string address);
+	virtual bool establish() = 0;
+	virtual bool disconnect() = 0;
+	virtual bool send() = 0;
+	virtual bool receive() = 0;
+	virtual bool hostname2IPAddress() = 0;
 
 	std::string get_hostname() const
 	{

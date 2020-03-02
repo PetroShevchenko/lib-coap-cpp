@@ -2,7 +2,7 @@
 #define COAP_CPP_H
 #ifndef __cplusplus
 #error This file should be included in C++ code. Do not use it for C code!
-#endif 
+#endif
 #include "blockwise.h"
 #include "connection.h"
 #include "context.h"
@@ -11,5 +11,5 @@
 #include "log.h"
 #include "packet.h"
 #include "uri.h"
-#include "uriEndpoint.h"
+#include "uriClientEndpoint.h"
 #endif

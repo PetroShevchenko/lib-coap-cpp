@@ -1,8 +1,6 @@
 #ifndef CLIENT_CONNECTION_H
 #define CLIENT_CONNECTION_H
-#include "connection.h"
-#include "error.h"
-#include "log.h"
+#include "coapcpp.h"
 
 namespace coap {
 

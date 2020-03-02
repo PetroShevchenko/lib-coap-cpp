@@ -7,4 +7,4 @@ set(LIB_SRC_LIST src/context.cc
 				src/uriServerEndpoint.cc)
 
 project (${LIB_PROJECT_NAME})
-add_library(${LIB_PROJECT_NAME} ${LIB_SRC_LIST})
+add_library(${LIB_PROJECT_NAME} STATIC ${LIB_SRC_LIST})

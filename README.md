@@ -65,21 +65,20 @@ How to install mbed-cli you can know by link https://os.mbed.com/docs/mbed-os/v5
 * cd lib-coap-cpp
 * Open Makefile and choose one of available values for variable TARGET: POSIX, RASPBERRY-PI-3, STM32H747I-DISCO
 
-##### For example:
-TARGET := STM32H747I-DISCO
+###### For example: TARGET := STM32H747I-DISCO
 
 * make build
 
 #### Installation
 To install the firmware you should copy it to the device
 
-##### Example for Raspberry Pi 3:
-cd lib-coap-cpp
-scp build/examples/coap-client/coap-client /home/pi
+###### Example for Raspberry Pi 3:
+* cd lib-coap-cpp
+* scp build/examples/coap-client/coap-client /home/pi
 
-##### Example for STM32H747I Discovery:
-cd lib-coap-cpp
-cp build/examples/coap-client/coap-client.bin /media/xxx
+###### Example for STM32H747I Discovery:
+* cd lib-coap-cpp
+* cp build/examples/coap-client/coap-client.bin /media/xxx
 
 ## Quickstart
 TODO

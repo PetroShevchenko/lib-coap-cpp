@@ -55,11 +55,13 @@ Currently, two hardware platforms are supported such as:
 Two compilation methods are available for Raspberry Pi 3 board, compilation on board and cross-compilation.
 If you want to use compilation on board you should set POSIX value to variable TARGET in Makefile.
 Otherside, you can compile library and examples on your Linux PC using cross-compilation.
-For this it is necessary to install ARM toolchain from here https://github.com/raspberrypi/tools.
+For this it is necessary to install ARM toolchain from here
+######https://github.com/raspberrypi/tools.
 How to install and setup the toolchain you can read by link
-https://www.raspberrypi.org/documentation/linux/kernel/building.md.
+######https://www.raspberrypi.org/documentation/linux/kernel/building.md.
 ARM mbed-cli utility is used to build libarary and examples for STM32H747I Discovery board.
-How to install mbed-cli you can know by link https://os.mbed.com/docs/mbed-os/v5.15/tools/manual-installation.html.
+How to install mbed-cli you can know by link
+######https://os.mbed.com/docs/mbed-os/v5.15/tools/manual-installation.html.
 
 #### Compiling
 * cd lib-coap-cpp
@@ -78,7 +80,7 @@ To install the firmware you should copy it to the device
 
 ###### Example for STM32H747I Discovery:
 * cd lib-coap-cpp
-* cp build/examples/coap-client/coap-client.bin /media/xxx
+* cp build/examples/coap-client/coap-client.bin /run/media/$USER/DIS_H747XI
 
 ## Quickstart
 TODO

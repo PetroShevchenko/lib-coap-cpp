@@ -56,12 +56,12 @@ Two compilation methods are available for Raspberry Pi 3 board, compilation on b
 If you want to use compilation on board you should set POSIX value to variable TARGET in Makefile.
 Otherside, you can compile library and examples on your Linux PC using cross-compilation.
 For this it is necessary to install ARM toolchain from here
-######https://github.com/raspberrypi/tools.
+https://github.com/raspberrypi/tools.
 How to install and setup the toolchain you can read by link
-######https://www.raspberrypi.org/documentation/linux/kernel/building.md.
+https://www.raspberrypi.org/documentation/linux/kernel/building.md.
 ARM mbed-cli utility is used to build libarary and examples for STM32H747I Discovery board.
 How to install mbed-cli you can know by link
-######https://os.mbed.com/docs/mbed-os/v5.15/tools/manual-installation.html.
+https://os.mbed.com/docs/mbed-os/v5.15/tools/manual-installation.html.
 
 #### Compiling
 * cd lib-coap-cpp

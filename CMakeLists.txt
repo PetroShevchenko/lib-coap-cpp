@@ -14,7 +14,8 @@ set(LIB_SRC_LIST src/context.cc
 				src/packet.cc
 				src/uri.cc
 				src/uriClientEndpoint.cc
-				src/uriServerEndpoint.cc)
+				src/uriServerEndpoint.cc
+				src/blockwise.cc)
 
 project (${LIB_PROJECT_NAME})
 

@@ -264,7 +264,7 @@ public:
 
 	static bool is_little_endian_byte_order()
 	{
-		const uint16_t test = 0x005A;
+		//const uint16_t test = 0x005A;
 		//test = htons(test);
 		//return (test & 0xFF) == 0x5A ? true : false;
 		return false;

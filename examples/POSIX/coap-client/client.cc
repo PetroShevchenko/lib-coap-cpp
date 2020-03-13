@@ -120,10 +120,10 @@ static bool parse_arguments(int argc, char ** argv)
 
 int main(int argc, char ** argv)
 {
-	int return_code;
+	//int return_code;
 	fd_set read_descriptors;
-	struct timeval tv;
-	time_t receive_timeout;
+	//struct timeval tv;
+	//time_t receive_timeout;
 
 	if (parse_arguments(argc, argv) == false) {
 		exit(EXIT_FAILURE);
@@ -142,8 +142,8 @@ int main(int argc, char ** argv)
 			FD_SET (STDIN_FILENO, &read_descriptors); // watch stdin (fd 0) to see when it has input
 			FD_SET (udp.get_descriptor(), &read_descriptors); // watch socket descriptor to receive data from a client
 	
-			tv.tv_sec = receive_timeout;
-	        tv.tv_usec = 0;
+			//tv.tv_sec = receive_timeout;
+	        //tv.tv_usec = 0;
 
 	        //TODO
 	        break;

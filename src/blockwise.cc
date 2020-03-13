@@ -1,20 +1,6 @@
 #include <cmath>
-
+#include <cassert>
 #include "blockwise.h"
-
-#if 0
-int coap_get_header_block1(void *packet, uint32_t *num, uint8_t *more, uint16_t *size, uint32_t *offset)
-{
-	coap_packet_t *const coap_pkt = (coap_packet_t *) packet;
-	if (!IS_OPTION(coap_pkt, COAP_OPTION_BLOCK1)) return 0;
-	/* pointers may be NULL to get only specific block parameters */
-	if (num!=NULL) *num = coap_pkt->block1_num;
-  	if (more!=NULL) *more = coap_pkt->block1_more;
-  	if (size!=NULL) *size = coap_pkt->block1_size;
-  	if (offset!=NULL) *offset = coap_pkt->block1_offset;
-  	return 1;
-}
-#endif
 
 namespace coap {
 
@@ -23,7 +9,11 @@ enum {
 	BLOCK_M_BIT		= 3,
 	BLOCK_NUM_SHIFT	= 4
 };
-
+#if 0
+blockwise::blockwise():_number(0),_offset(0),_size(0),_more(false)
+{
+}
+#endif
 bool blockwise::decode_block_option(const packet::option_t * optionP)
 {
 	bool status = false;
@@ -33,6 +23,7 @@ bool blockwise::decode_block_option(const packet::option_t * optionP)
 		return false;
 	}
 	std::uint8_t szx;
+	bool little_endian = packet::is_little_endian_byte_order();
 	switch(optionP->value.size())
 	{
 		case 1:
@@ -47,7 +38,14 @@ bool blockwise::decode_block_option(const packet::option_t * optionP)
 			szx = optionP->value[1] & BLOCK_SZX_MASK;
 			_size = static_cast<std::uint16_t>(pow(2, szx + 4));
 			_more = optionP->value[1] & (1 << BLOCK_M_BIT);
-			_number = static_cast<std::uint32_t>(optionP->value[1] >> BLOCK_NUM_SHIFT | optionP->value[0] << BLOCK_NUM_SHIFT);
+			if (little_endian == true) {
+				_number = static_cast<std::uint32_t>(optionP->value[1] >> BLOCK_NUM_SHIFT
+													| optionP->value[0] << BLOCK_NUM_SHIFT);//Little endian
+			}
+			else {
+				_number = static_cast<std::uint32_t>(optionP->value[1] << BLOCK_NUM_SHIFT
+													| optionP->value[0] >> BLOCK_NUM_SHIFT);//Big endian
+			}
 			status = true;
 			break;
 
@@ -55,30 +53,86 @@ bool blockwise::decode_block_option(const packet::option_t * optionP)
 			szx = optionP->value[2] & BLOCK_SZX_MASK;
 			_size = static_cast<std::uint16_t>(pow(2, szx + 4));
 			_more = optionP->value[2] & (1 << BLOCK_M_BIT);
-			_number = static_cast<std::uint32_t>(optionP->value[2] >> BLOCK_NUM_SHIFT 
+			if (little_endian == true) {
+				_number = static_cast<std::uint32_t>(optionP->value[2] >> BLOCK_NUM_SHIFT
 																| optionP->value[1] << BLOCK_NUM_SHIFT
-																| optionP->value[0] << (BLOCK_NUM_SHIFT + 8));
+																| optionP->value[0] << (BLOCK_NUM_SHIFT + 8));//Little endian
+			}
+			else {
+				_number = static_cast<std::uint32_t>(optionP->value[2] << BLOCK_NUM_SHIFT
+																| optionP->value[1] >> BLOCK_NUM_SHIFT
+																| optionP->value[0] >> (BLOCK_NUM_SHIFT + 8));//Big endian
+			}
 			status = true;
 			break;
 
 		default:
 			LOG(DEBUG, "Wrong size of option");
 			status = false;
-			break;	
+			break;
 	}
 	return status;
 }
 
 bool blockwise::decode_size_option(const packet::option_t * optionP)
 {
-	//TODO
-	return false;
+	bool status = false;
+	if (optionP->number != SIZE_1
+		|| optionP->number != SIZE_2) {
+		LOG(DEBUG, "There are no any SIZE options");
+		return false;
+	}
+	bool little_endian = packet::is_little_endian_byte_order();
+	switch(optionP->value.size())
+	{
+		case 1:
+			_offset += optionP->value[0];
+			break;
+
+		case 2:
+			if (little_endian == true) {
+				_offset += optionP->value[0] << 8 | optionP->value[1];//Little endian
+			}
+			else {
+				_offset += optionP->value[0] >> 8 | optionP->value[1];//Big endian
+			}
+			break;
+
+		case 3:
+			if (little_endian == true) {
+				_offset += optionP->value[0] << 16 | optionP->value[1] << 8 | optionP->value[2];//Little endian
+			}
+			else {
+				_offset += optionP->value[0] >> 16 | optionP->value[1] >> 8 | optionP->value[2];//Big endian
+			}
+			break;
+
+		case 4:
+			if (little_endian == true) {
+				_offset += optionP->value[0] << 24 | optionP->value[1] << 16
+							| optionP->value[2] << 8 | optionP->value[3];//Little endian
+			}
+			else {
+				_offset += optionP->value[0] >> 24 | optionP->value[1] >> 16
+							| optionP->value[2] >> 8 | optionP->value[3];//Big endian
+			}
+			break;
+
+		default:
+			LOG(DEBUG, "Wrong size of option");
+			status = false;
+			break;
+	}
+
+	return status;
 }
 
-bool block1::has_block1_option(packet & pack, size_t * optionQuantityP)
+bool block1::get_block1_option(packet & pack, size_t * optionQuantityP, const packet::option_t ** optionPP)
 {
-	const packet::option_t * optionP = pack.find_options(BLOCK_1, optionQuantityP);
-	if (optionP == nullptr) {
+	assert(optionQuantityP != nullptr);
+	assert(optionPP != nullptr);
+	*optionPP = pack.find_options(BLOCK_1, optionQuantityP);
+	if (*optionPP == nullptr) {
 		return false;
 	}
 	return true;
@@ -86,12 +140,17 @@ bool block1::has_block1_option(packet & pack, size_t * optionQuantityP)
 
 bool block1::get_header (packet & pack)
 {
-  	size_t optionQuantity;
-  	if (has_block1_option(pack, &optionQuantity) == false) {
+	size_t optionQuantity;
+	const packet::option_t * optionP;
+	if (get_block1_option(pack, &optionQuantity, &optionP) == false) {
 		LOG(DEBUG, "There is no BLOCK 1 option in the packet");
-  		return false;
-  	}
-  	//TODO
+		return false;
+	}
+	if (decode_block_option(optionP) == false) {
+		LOG(DEBUG, "Unable to decode BLOCK1 option");
+		return false;
+	}
+	return true;
 }
 
 }//coap

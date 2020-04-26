@@ -2,6 +2,8 @@
 #include "log.h"
 #include "error.h"
 #include <cstring>
+#include <cstdlib>
+#include <climits>
 #include <algorithm>
 
 namespace coap{
@@ -477,18 +479,55 @@ void packet::add_option(option_number_t number, const std::uint8_t * value, cons
 	set_option_bitmap(option.number);
 }
 
+bool packet::generate_token(int tokenLength)
+{
+	if (tokenLength < 0 && tokenLength > 8) return false;
+	for (int i = 0; i < tokenLength; i++)
+	{
+		_message.token[i] = static_cast<std::uint8_t>(rand() % (UCHAR_MAX + 1));
+	}
+	set_message_tokenLength(static_cast<std::uint8_t>(tokenLength));
+	return true;
+}
+
+void packet::generate_message_id()
+{
+	_message.messageId = static_cast<std::uint16_t>(rand() % (USHRT_MAX + 1));
+}
+
+/* Before calling of this method you should call add_option to create needed options.
+   payload should be in network bytes order
+*/
+void packet::make_request(message_type_t messageType, std::uint16_t messageId, message_code_t code,
+								const std::uint8_t * payload, const size_t payloadLength)
+{
+	set_message_version(COAP_VERSION);
+	set_message_type(static_cast<std::uint8_t>(messageType));
+	generate_message_id();
+	set_message_code(static_cast<std::uint8_t>(code));
+	generate_token(8);
+	_message.payload.clear();
+	if (payloadLength > 0) {
+		for (size_t i = 0; i < payloadLength; i++)
+		{
+			_message.payload.push_back(payload[i]);
+		}
+	}
+}
+
 void packet::prepare_answer(message_type_t messageType, std::uint16_t messageId, message_code_t responseCode,
 								const std::uint8_t * payload, const size_t payloadLength)
 {
-	assert(payload != nullptr);
 	set_message_version(COAP_VERSION);
 	set_message_type(static_cast<std::uint8_t>(messageType));
 	set_message_messageId(messageId);
 	set_message_code(static_cast<std::uint8_t>(responseCode));
 	_message.payload.clear();
-	for (size_t i = 0; i < payloadLength; i++)
-	{
-		_message.payload.push_back(payload[i]);
+	if (payloadLength > 0) {
+		for (size_t i = 0; i < payloadLength; i++)
+		{
+			_message.payload.push_back(payload[i]);
+		}
 	}
 }
 

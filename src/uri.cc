@@ -1,6 +1,10 @@
 #include "uri.h"
+#include "log.h"
 #include <cstring>
 #include <cstdlib>
+
+LOG_USING_NAMESPACE
+LOG_EXTERN_DECLARE
 
 namespace coap {
 
@@ -21,7 +25,7 @@ uri::uri(uri::uri_t URI): _uri(std::move(URI))
 
 bool uri::path_to_uri()
 {
-	LOG(DEBUG,"Entering");
+	LOG(DEBUGGING,"Entering");
 	char * token = nullptr;
 	char * p = nullptr;
 
@@ -44,7 +48,7 @@ bool uri::path_to_uri()
 	}
 
 	do {
-		LOG(DEBUG,"token =", token);
+		LOG(DEBUGGING,"token =", token);
 		if(_uri.type == URI_TYPE_STRING) {
 			_uri.asString.push_back(token);
 		}
@@ -55,7 +59,7 @@ bool uri::path_to_uri()
 	} while (token != NULL);
 
 	delete [] token;
-	LOG(DEBUG,"Leaving");
+	LOG(DEBUGGING,"Leaving");
 	return true;
 }
 

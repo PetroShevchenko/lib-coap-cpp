@@ -12,6 +12,9 @@
 #include "coapcpp.h"
 #include "clientConnection.h"
 
+LOG_USING_NAMESPACE
+LOG_EXTERN_DECLARE
+
 namespace coap {
 
 error clientConnection::_error;
@@ -33,7 +36,7 @@ clientConnection::~clientConnection()
 {
 	if (_serverIPv6Address != nullptr) delete _serverIPv6Address;
 	if (_serverIPv4Address != nullptr) delete _serverIPv4Address;
-	LOG_DELETE;
+	//LOG_DELETE;
 }
 
 bool clientConnection::fill_buffer(std::uint8_t * data, size_t size)

@@ -18,6 +18,8 @@
 
 using namespace std;
 using namespace coap;
+LOG_USING_NAMESPACE
+LOG_GLOBAL_DECLARE
 
 const std::string ipv6_address_default = "[::1]";
 const std::string ipv4_address_default = "127.0.0.1";

@@ -1,8 +1,9 @@
 #include "log.h"
 #include "uriServerEndpoint.h"
 
+using namespace coap;
 LOG_USING_NAMESPACE
-
+LOG_GLOBAL_DECLARE
 
 int main()
 {
@@ -10,7 +11,7 @@ int main()
 
 	auto test_func = [&]()->bool
 	{
-		LOG(DEBUG,"It is test_func");
+		LOG(DEBUGGING,"It is test_func");
 	};
 
 	uriServerEndpoint::callback_t callbacks [METHODS_COUNT] = {
@@ -28,14 +29,12 @@ int main()
 	};
 
 	try {
-
 		uriServerEndpoint ep1("/first/second/third/forth",callbacks, attributes);
-		LOG(DEBUG, ep1.get_uri());
-
+		LOG(DEBUGGING, ep1.get_uri());
 	}
 	catch(...)
 	{
-		LOG(DEBUG,"It was cought an exception");
+		LOG(DEBUGGING,"It was cought an exception");
 		LOG_DELETE;
 		exit(1);
 	}

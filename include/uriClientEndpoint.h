@@ -16,7 +16,7 @@ public:
 	void transaction_step();
 
 private:
-	LOG_CREATE(ALL,std::clog);
+	//LOG_CREATE(ALL,std::clog);
 
 public:
 	uriClientEndpoint(std::string path) : 
@@ -24,7 +24,7 @@ public:
 	{}
 	~uriClientEndpoint()
 	{
-		LOG_DELETE;
+		//LOG_DELETE;
 	}
 	uriClientEndpoint(const uriClientEndpoint &) = delete;
 	uriClientEndpoint & operator=(const uriClientEndpoint &) = delete;

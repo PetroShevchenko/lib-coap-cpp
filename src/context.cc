@@ -1,4 +1,8 @@
 #include "context.h"
+#include "log.h"
+
+LOG_USING_NAMESPACE
+LOG_EXTERN_DECLARE
 
 namespace coap{
 
@@ -26,14 +30,14 @@ bool context::clearInstance(context & instance)
 
 context::context()
 {
-	LOG(DEBUG,"Entering");
+	LOG(DEBUGGING,"Entering");
 	//TODO
-	LOG(DEBUG,"Leaving");
+	LOG(DEBUGGING,"Leaving");
 }
 
 context::~context()
 {
-	LOG_DELETE;
+	//LOG_DELETE;
 }
 
 contextDestroyer::~contextDestroyer()

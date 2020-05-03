@@ -6,6 +6,9 @@
 #include <climits>
 #include <algorithm>
 
+LOG_USING_NAMESPACE
+LOG_EXTERN_DECLARE
+
 namespace coap{
 
 packet * packet::_instanceP = 0;
@@ -38,7 +41,7 @@ bool packet::clearInstance(packet & instance)
 packet::packet()
 {
 	LOG_SET_LEVEL(ALL);
-	LOG(DEBUG,"Entering");
+	LOG(DEBUGGING,"Entering");
 
 	_message.headerInfo.asByte = 0;
 	_message.code.asByte = 0;
@@ -47,12 +50,12 @@ packet::packet()
 	_option_bitmap[0] = 0;
 	_option_bitmap[1] = 0;
 	LOG(INFO,"Arhitecture of the CPU is (1 - Little Endian, 0 - Big Endian): ", _is_little_endian);
-	LOG(DEBUG,"Leaving");
+	LOG(DEBUGGING,"Leaving");
 }
 
 packet::~packet()
 {
-	LOG_DELETE;
+	//LOG_DELETE;
 }
 
 packetDestroyer::~packetDestroyer()
@@ -92,6 +95,14 @@ std::ostream & operator<<(std::ostream & os,const packet::code_t &code)
 	return os;
 }
 
+template <typename T>
+std::ostream & operator<<(std::ostream & os,const std::vector<T> &v)
+{
+	for (auto i : v)
+		os << i << "\t";
+	return os;
+}
+
 std::ostream & operator<<(std::ostream & os,const packet::message_t &message)
 {
 	os << message.headerInfo << message.code <<
@@ -122,7 +133,7 @@ std::ostream & operator<<(std::ostream & os,const packet &object)
 bool packet::parse_header(const std::uint8_t * buffer, const size_t length)
 {
 	assert(buffer != nullptr);
-	LOG(DEBUG, "Entering");
+	LOG(DEBUGGING, "Entering");
 	if (length < PACKET_MIN_LENGTH) {
 		_error.set_code(WRONG_ARGUMENT);
 		LOG(ERROR, "Length of buffer is too short, must be at least ", PACKET_MIN_LENGTH, " bytes, but equals ", length);
@@ -130,10 +141,10 @@ bool packet::parse_header(const std::uint8_t * buffer, const size_t length)
 	}
 	set_message_headerInfo(buffer[0]);
 	LOG_SET_STREAM_FORMAT(std::ios::hex, std::ios::basefield);
-	LOG(DEBUG,"buffer[0]=",static_cast<int>(buffer[0]));
-	LOG(DEBUG,"get_message_version() =",static_cast<int>(get_message_version()));
-	LOG(DEBUG,"get_message_type() =",static_cast<int>(get_message_type()));
-	LOG(DEBUG,"get_message_tokenLength() =",static_cast<int>(get_message_tokenLength()));
+	LOG(DEBUGGING,"buffer[0]=",static_cast<int>(buffer[0]));
+	LOG(DEBUGGING,"get_message_version() =",static_cast<int>(get_message_version()));
+	LOG(DEBUGGING,"get_message_type() =",static_cast<int>(get_message_type()));
+	LOG(DEBUGGING,"get_message_tokenLength() =",static_cast<int>(get_message_tokenLength()));
 
 	if (COAP_VERSION != get_message_version()) {
 		_error.set_code(PROTOCOL_VERSION);
@@ -147,7 +158,7 @@ bool packet::parse_header(const std::uint8_t * buffer, const size_t length)
 	else {
 		set_message_messageId(static_cast<std::uint16_t>(buffer[3] | (buffer[2] << 8)));
 	}
-	LOG(DEBUG, "Leaving");
+	LOG(DEBUGGING, "Leaving");
 	return true;
 }
 
@@ -156,7 +167,7 @@ bool packet::parse_token(const std::uint8_t * buffer, const size_t length)
 	assert(buffer != nullptr);
 	std::memset(_message.token, 0, TOKEN_MAX_LENGTH);
 	if (0 == get_message_tokenLength()) {
-		LOG(DEBUG,"Token is not presented into the packet");
+		LOG(DEBUGGING,"Token is not presented into the packet");
 		return true;
 	}
 	if (get_message_tokenLength() > TOKEN_MAX_LENGTH ||
@@ -178,7 +189,7 @@ bool packet::parse_options(const std::uint8_t * buffer, const size_t length)
 	option_t opt = {0};
 	uint16_t optDelta = 0;
 	uint16_t optLength = 0;
-	LOG(DEBUG,"optionsOffset = ", optionsOffset);
+	LOG(DEBUGGING,"optionsOffset = ", optionsOffset);
 
 	for (i = optionsOffset; buffer[i] != _message.payloadMarker && i < length; i += optLength)
 	{
@@ -186,8 +197,8 @@ bool packet::parse_options(const std::uint8_t * buffer, const size_t length)
 		optDelta = opt.header.asBitfield.delta ;
 		optLength = opt.header.asBitfield.length;
 
-		LOG(DEBUG,"opt.header.asBitfield.delta = ", static_cast<int>(opt.header.asBitfield.delta));
-		LOG(DEBUG,"opt.header.asBitfield.length = ", static_cast<int>(opt.header.asBitfield.length));
+		LOG(DEBUGGING,"opt.header.asBitfield.delta = ", static_cast<int>(opt.header.asBitfield.delta));
+		LOG(DEBUGGING,"opt.header.asBitfield.length = ", static_cast<int>(opt.header.asBitfield.length));
 
 		auto option_parser = [&](std::uint8_t parsing, std::uint16_t * modifying )->bool
 		{
@@ -234,10 +245,10 @@ bool packet::parse_options(const std::uint8_t * buffer, const size_t length)
 
 		opt.number = optDelta;
 
-		LOG(DEBUG,"optLength = ", optLength);
+		LOG(DEBUGGING,"optLength = ", optLength);
 		for (int j = 0; j < optLength; j++)
 		{
-			LOG(DEBUG,"buffer[i + j] = ", static_cast<int>(buffer[i + j]));
+			LOG(DEBUGGING,"buffer[i + j] = ", static_cast<int>(buffer[i + j]));
 			opt.value.push_back( buffer[i + j] );
 		}
 
@@ -373,7 +384,7 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length, bool checkBufferS
 	size_t tokenLength = static_cast<size_t>(_message.headerInfo.asBitfield.tokenLength);
 
 	if (tokenLength > TOKEN_MAX_LENGTH) {
-		LOG(DEBUG,"Token length is wrong");
+		LOG(DEBUGGING,"Token length is wrong");
 		_error.set_code(TOKEN_LENGTH);
 		return false;
 	}
@@ -407,7 +418,7 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length, bool checkBufferS
 		};
 
 		if (!checkBufferSizeOnly && offset > *length) {
-			LOG(DEBUG, "The buffer length is too small");
+			LOG(DEBUGGING, "The buffer length is too small");
 			_error.set_code(BUFFER_LENGTH);
 			return false;
 		}
@@ -440,7 +451,7 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length, bool checkBufferS
 	else {
 		if (!checkBufferSizeOnly && *length < PACKET_HEADER_SIZE + tokenLength + optionsLength
 										 + sizeof(_message.payloadMarker) + _message.payload.size()) {
-			LOG(DEBUG, "The buffer length is too small");
+			LOG(DEBUGGING, "The buffer length is too small");
 			_error.set_code(BUFFER_LENGTH);
 			return false;
 		}
@@ -498,7 +509,7 @@ void packet::generate_message_id()
 /* Before calling of this method you should call add_option to create needed options.
    payload should be in network bytes order
 */
-void packet::make_request(message_type_t messageType, std::uint16_t messageId, message_code_t code,
+void packet::make_request(message_type_t messageType, message_code_t code,
 								const std::uint8_t * payload, const size_t payloadLength)
 {
 	set_message_version(COAP_VERSION);

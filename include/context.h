@@ -28,7 +28,7 @@ protected:
 	friend class contextDestroyer;
 
 private:
-	LOG_CREATE(ALL,std::clog);
+	//LOG_CREATE(ALL,std::clog);
 
 	static context * _instanceP;
 	static contextDestroyer _destroyer;

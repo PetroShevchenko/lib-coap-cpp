@@ -9,6 +9,10 @@
 
 #ifndef LOG_ENABLE
 #define LOG_USING_NAMESPACE
+#define LOG_DECLARE
+#define LOG_STATIC_DECLARE
+#define LOG_GLOBAL_DECLARE
+#define LOG_EXTERN_DECLARE
 #define LOG_CREATE(loggingLevels, outputStream)
 #define LOG_DELETE
 #define LOG(level, ...)
@@ -28,9 +32,13 @@
 #include <ctime>
 #include <iomanip>
 #endif
-#define LOG_USING_NAMESPACE using namespace coap;
-#define LOG_CREATE(loggingLevels, outputStream) coap::log * instanceP = coap::log::createInstance(loggingLevels, outputStream)
-#define LOG_DELETE coap::log::deleteInstance(&instanceP)
+#define LOG_USING_NAMESPACE using namespace logging;
+#define LOG_DECLARE logging::log * instanceP;
+#define LOG_STATIC_DECLARE static LOG_DECLARE
+#define LOG_GLOBAL_DECLARE LOG_DECLARE
+#define LOG_EXTERN_DECLARE extern LOG_DECLARE
+#define LOG_CREATE(loggingLevels, outputStream) instanceP = logging::log::createInstance(loggingLevels, outputStream)
+#define LOG_DELETE logging::log::deleteInstance(&instanceP)
 #define LOG(level, ...) instanceP->print(level, __FILE__, __func__, __LINE__, __VA_ARGS__ )
 #define LOG_SET_LEVEL(level) instanceP->set_level(level)
 #define LOG_UNSET_LEVEL(level) instanceP->unset_level(level)
@@ -46,25 +54,18 @@
 #define LOG_PRINT_LINE_OF_CODE
 */
 
-namespace coap {
+
+namespace logging {
 
 using level_t = enum {
 	NONE = 0,
 	INFO,
-	DEBUG,
+	DEBUGGING,
 	WARNING,
 	ERROR,
 	CRITICAL,
-	ALL = (1 << INFO)|(1 << DEBUG)|(1 << WARNING)|(1 << ERROR)|(1 << CRITICAL)
+	ALL = (1 << INFO)|(1 << DEBUGGING)|(1 << WARNING)|(1 << ERROR)|(1 << CRITICAL)
 };
-
-template <typename T>
-std::ostream & operator<<(std::ostream & os,const std::vector<T> &v)
-{
-	for (auto i : v)
-		os << i << "\t";
-	return os;
-}
 
 /**
 	\class log
@@ -243,6 +244,6 @@ public:
 		print(level, file, func, line, args...);
 	}
 };//log
-} //coap
+} //logging
 #endif//LOG_ENABLE
 #endif//LOG_H

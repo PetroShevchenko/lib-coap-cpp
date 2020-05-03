@@ -2,7 +2,9 @@
 #include "log.h"
 #include "error.h"
 
+using namespace coap;
 LOG_USING_NAMESPACE
+LOG_GLOBAL_DECLARE
 
 int main()
 {
@@ -17,7 +19,7 @@ int main()
 		//uri urin("/first/second/third/forth");
 		//uri urin("bla-bla-bla");
 		//uri urin("");
-		LOG(DEBUG, urin);
+		LOG(DEBUGGING, urin);
 	}
 	catch(error * er) {
 		LOG(ERROR, er->get_message());

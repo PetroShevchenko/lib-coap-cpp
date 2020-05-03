@@ -7,6 +7,9 @@
 #include <functional>
 #include <string>
 
+LOG_USING_NAMESPACE
+LOG_EXTERN_DECLARE
+
 namespace coap {
 
 
@@ -27,7 +30,7 @@ public:
 	void transaction_step();
 
 private:
-	LOG_CREATE(ALL,std::clog);
+	//LOG_CREATE(ALL,std::clog);
 
 	uri _uri;
 	handler_t _handler[METHODS_COUNT];
@@ -37,7 +40,7 @@ public:
 	uriServerEndpoint (std::string path, callback_t callbacks[METHODS_COUNT], std::string attributes[METHODS_COUNT]):
 	endpoint (path), _uri(path)
 	{
-		LOG(DEBUG,"Constructor");
+		LOG(DEBUGGING,"Constructor");
 		for(size_t i = 0; i < METHODS_COUNT; i++)
 		{
 			_handler[i].code = static_cast<method_code_t>(i);
@@ -48,7 +51,7 @@ public:
 
 	~uriServerEndpoint()
 	{
-		LOG_DELETE;
+		//LOG_DELETE;
 	}
 	uriServerEndpoint(const uriServerEndpoint &) = delete;
 	uriServerEndpoint & operator=(const uriServerEndpoint &) = delete;

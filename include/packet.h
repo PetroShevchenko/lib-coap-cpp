@@ -180,7 +180,7 @@ protected:
 	friend class packetDestroyer;
 
 private:
-	LOG_CREATE(NONE,std::clog);
+	//LOG_CREATE(NONE,std::clog);
 
 	static packet * _instanceP;
 	static packetDestroyer _destroyer;
@@ -248,7 +248,7 @@ public:
 	void add_option(option_number_t number, const std::uint8_t * value, const size_t length);
 	void prepare_answer(message_type_t messageType, std::uint16_t messageId, message_code_t responseCode,
 									const std::uint8_t * payload, const size_t payloadLength);
-	void make_request(message_type_t messageType, std::uint16_t messageId, message_code_t code,
+	void make_request(message_type_t messageType, message_code_t code,
 								const std::uint8_t * payload, const size_t payloadLength);
 
 	const option_t * find_options(const std::uint8_t number, size_t * quantity);

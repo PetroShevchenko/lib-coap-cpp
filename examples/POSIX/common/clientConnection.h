@@ -7,7 +7,7 @@ namespace coap {
 class clientConnection : public connection {
 
 private:
-	LOG_CREATE(ALL,std::clog);
+	//LOG_CREATE(ALL,std::clog);
 
 protected:
 	struct sockaddr_in6 * _serverIPv6Address;

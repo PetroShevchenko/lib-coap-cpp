@@ -2,7 +2,7 @@
 #define BLOCKWISE_H
 #include <vector>
 #include <cstdint>
-#include "log.h"
+//#include "log.h"
 #include "error.h"
 #include "packet.h"
 
@@ -10,7 +10,7 @@ namespace coap {
 
 class blockwise {
 private:
-	LOG_CREATE(ALL,std::clog);
+	//LOG_CREATE(ALL,std::clog);
 	std::vector<std::uint8_t> _data;
 
 protected:
@@ -31,7 +31,7 @@ public:
 
 class block1 : public blockwise {
 private:
-	LOG_CREATE(ALL,std::clog);
+	//LOG_CREATE(ALL,std::clog);
 	bool get_block1_option(packet & pack, size_t * optionQuantityP, const packet::option_t ** optionPP);
 public:
 	bool get_header (packet & pack);
@@ -40,7 +40,7 @@ public:
 
 class block2: public blockwise {
 private:
-	LOG_CREATE(ALL,std::clog);
+	//LOG_CREATE(ALL,std::clog);
 public:
 	bool get_header (packet & pack);
 	bool set_header (packet & pack);

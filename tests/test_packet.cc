@@ -1,12 +1,14 @@
 #include "packet.h"
 #include "log.h"
 
+using namespace coap;
 LOG_USING_NAMESPACE
+LOG_GLOBAL_DECLARE
 
 int main()
 {
 	LOG_CREATE(NONE, std::clog);
-	LOG_SET_LEVEL(DEBUG);
+	LOG_SET_LEVEL(DEBUGGING);
 
 	std::uint8_t test1_coap_packet[] = {// in network order
 
@@ -46,21 +48,21 @@ int main()
 			throw;
 		}
 
-		LOG(DEBUG, "CoAP Version: ", static_cast<int>(instance.get_message_version()));
-		LOG(DEBUG, "Message type: ", static_cast<int>(instance.get_message_type()));
-		LOG(DEBUG, "Token length: ", static_cast<int>(instance.get_message_tokenLength()));
-		LOG(DEBUG, "Command code: ", static_cast<int>(instance.get_message_code()));
-		LOG(DEBUG, "Message ID: ", instance.get_message_messageId());
+		LOG(DEBUGGING, "CoAP Version: ", static_cast<int>(instance.get_message_version()));
+		LOG(DEBUGGING, "Message type: ", static_cast<int>(instance.get_message_type()));
+		LOG(DEBUGGING, "Token length: ", static_cast<int>(instance.get_message_tokenLength()));
+		LOG(DEBUGGING, "Command code: ", static_cast<int>(instance.get_message_code()));
+		LOG(DEBUGGING, "Message ID: ", instance.get_message_messageId());
 
 		//LOG_SET_STREAM_FORMAT(std::ios::hex, std::ios::basefield);
-		LOG(DEBUG, instance);
+		LOG(DEBUGGING, instance);
 
 		const packet::option_t * optP;
 		size_t quantity;
 
 		optP = instance.find_options (0, &quantity);
-		LOG(DEBUG, *optP);
-		LOG(DEBUG, "Number of options #0 : ",quantity);
+		LOG(DEBUGGING, *optP);
+		LOG(DEBUGGING, "Number of options #0 : ",quantity);
 
 		LOG_SET_STREAM_FORMAT(std::ios::dec, std::ios::basefield);
 
@@ -95,19 +97,19 @@ int main()
 			throw;
 		}
 
-		LOG(DEBUG, "buffer length is ", length);
+		LOG(DEBUGGING, "buffer length is ", length);
 
 		std::uint8_t * buffer = new unsigned char [length];
 
 
-		LOG(DEBUG, "option_bitmap[0] = ", instance.get_option_bitmap()[0] );
-		LOG(DEBUG, "option_bitmap[1] = ", instance.get_option_bitmap()[1] );
+		LOG(DEBUGGING, "option_bitmap[0] = ", instance.get_option_bitmap()[0] );
+		LOG(DEBUGGING, "option_bitmap[1] = ", instance.get_option_bitmap()[1] );
 
 		if (!instance.serialize(buffer, &length, false)) {
 			LOG(ERROR, "serialize is failure");
 		}
 		else {
-			LOG(DEBUG,"\nbuffer[ ", length, " ] = ");
+			LOG(DEBUGGING,"\nbuffer[ ", length, " ] = ");
 			LOG_SET_STREAM_FORMAT(std::ios::hex, std::ios::basefield);
 			for(size_t i = 0; i < length; i++)
 			{
@@ -129,9 +131,9 @@ int main()
 			throw;
 		}
 
-		LOG(DEBUG, "ANSWER :");
+		LOG(DEBUGGING, "ANSWER :");
 
-		LOG(DEBUG, "buffer length is ", length);
+		LOG(DEBUGGING, "buffer length is ", length);
 
 		buffer = new unsigned char [length];
 
@@ -139,7 +141,7 @@ int main()
 			LOG(ERROR, "serialize is failure");
 		}
 		else {
-			LOG(DEBUG,"\nbuffer[ ", length, " ] = ");
+			LOG(DEBUGGING,"\nbuffer[ ", length, " ] = ");
 			LOG_SET_STREAM_FORMAT(std::ios::hex, std::ios::basefield);
 			for(size_t i = 0; i < length; i++)
 			{
@@ -152,11 +154,11 @@ int main()
 
 
 		if (!delete_packet(instance))
-			LOG(DEBUG, "Packet was not deleted");
+			LOG(DEBUGGING, "Packet was not deleted");
 	}
 	catch(...)
 	{
-		LOG(DEBUG,"It was cought an exception");
+		LOG(DEBUGGING,"It was cought an exception");
 		LOG_DELETE;
 		exit(1);
 	}

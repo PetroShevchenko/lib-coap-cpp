@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include "log.h"
+//#include "log.h"
 #include "error.h"
 
 namespace coap {
@@ -11,7 +11,7 @@ namespace coap {
 class uri {
 
 private:
-	LOG_CREATE(ALL, std::clog);
+	//LOG_CREATE(ALL, std::clog);
 
 public:
 	enum {
@@ -49,7 +49,7 @@ public:
 
 	virtual ~uri()
 	{
-		LOG_DELETE;
+		//LOG_DELETE;
 	}
 	std::string get_path() const {
 		return _path;

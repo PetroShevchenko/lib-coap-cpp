@@ -1,6 +1,10 @@
 #include <cmath>
 #include <cassert>
 #include "blockwise.h"
+#include "log.h"
+
+LOG_USING_NAMESPACE
+LOG_EXTERN_DECLARE
 
 namespace coap {
 
@@ -19,7 +23,7 @@ bool blockwise::decode_block_option(const packet::option_t * optionP)
 	bool status = false;
 	if (optionP->number != BLOCK_1
 		|| optionP->number != BLOCK_2) {
-		LOG(DEBUG, "There are no any BLOCK options");
+		LOG(DEBUGGING, "There are no any BLOCK options");
 		return false;
 	}
 	std::uint8_t szx;
@@ -67,7 +71,7 @@ bool blockwise::decode_block_option(const packet::option_t * optionP)
 			break;
 
 		default:
-			LOG(DEBUG, "Wrong size of option");
+			LOG(DEBUGGING, "Wrong size of option");
 			status = false;
 			break;
 	}
@@ -79,7 +83,7 @@ bool blockwise::decode_size_option(const packet::option_t * optionP)
 	bool status = false;
 	if (optionP->number != SIZE_1
 		|| optionP->number != SIZE_2) {
-		LOG(DEBUG, "There are no any SIZE options");
+		LOG(DEBUGGING, "There are no any SIZE options");
 		return false;
 	}
 	bool little_endian = packet::is_little_endian_byte_order();
@@ -119,7 +123,7 @@ bool blockwise::decode_size_option(const packet::option_t * optionP)
 			break;
 
 		default:
-			LOG(DEBUG, "Wrong size of option");
+			LOG(DEBUGGING, "Wrong size of option");
 			status = false;
 			break;
 	}
@@ -143,11 +147,11 @@ bool block1::get_header (packet & pack)
 	size_t optionQuantity;
 	const packet::option_t * optionP;
 	if (get_block1_option(pack, &optionQuantity, &optionP) == false) {
-		LOG(DEBUG, "There is no BLOCK 1 option in the packet");
+		LOG(DEBUGGING, "There is no BLOCK 1 option in the packet");
 		return false;
 	}
 	if (decode_block_option(optionP) == false) {
-		LOG(DEBUG, "Unable to decode BLOCK1 option");
+		LOG(DEBUGGING, "Unable to decode BLOCK1 option");
 		return false;
 	}
 	return true;

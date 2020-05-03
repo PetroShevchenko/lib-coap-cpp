@@ -4,7 +4,7 @@
 #include <functional>
 #include <string>
 #include <cassert>
-#include "log.h"
+//#include "log.h"
 #include "uri.h"
 #include "packet.h"
 #include "connection.h"
@@ -18,7 +18,7 @@ public:
 	virtual void transaction_step() = 0;
 
 protected:
-	LOG_CREATE(ALL,std::clog);
+	//LOG_CREATE(ALL,std::clog);
 	std::string _name;
 	std::vector<connection *> _connections;
 
@@ -29,7 +29,7 @@ public:
 
 	virtual ~endpoint()
 	{
-		LOG_DELETE;
+		//LOG_DELETE;
 	}
 	endpoint(const endpoint &) = delete;
 	endpoint & operator=(const endpoint &) = delete;

@@ -12,6 +12,10 @@
 #include "coapcpp.h"
 #include "clientConnection.h"
 
+#ifndef MSG_CONFIRM
+#define MSG_CONFIRM 0
+#endif
+
 LOG_USING_NAMESPACE
 LOG_EXTERN_DECLARE
 

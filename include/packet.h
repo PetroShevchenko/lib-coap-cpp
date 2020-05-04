@@ -126,7 +126,8 @@ enum media_type_e {
 	XML 			= 41,
 	OCTET_STREAM 	= 42,
 	EXI 			= 47,
-	JSON 			= 50
+	JSON 			= 50,
+	TLV        		= 11542
 };
 
 using method_code_t =
@@ -180,7 +181,6 @@ protected:
 	friend class packetDestroyer;
 
 private:
-	//LOG_CREATE(NONE,std::clog);
 
 	static packet * _instanceP;
 	static packetDestroyer _destroyer;
@@ -268,10 +268,10 @@ public:
 
 	static bool is_little_endian_byte_order()
 	{
-		//const uint16_t test = 0x005A;
+		const uint16_t test = 0x005A;
 		//test = htons(test);
-		//return (test & 0xFF) == 0x5A ? true : false;
-		return false;
+		return (test & 0xFF) == 0x5A ? true : false;
+		//return false;
 	}
 
 	void clean_options()

@@ -394,10 +394,11 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length, bool checkBufferS
 
 	if (!checkBufferSizeOnly)	assert(offset < *length);
 
+	std::uint8_t optNumDelta = 0;
+	std::uint32_t optDelta = 0;
+
 	for (auto opt : _message.options)
 	{
-		std::uint32_t optDelta = 0;
-		std::uint8_t optNumDelta = 0;
 		std::uint8_t lengthNibble = 0;
 		std::uint8_t deltaNibble = 0;
 
@@ -429,8 +430,8 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length, bool checkBufferS
 		lengthNibble = get_option_nibble(static_cast<std::uint32_t>(opt.value.size()));
 
 		if (!checkBufferSizeOnly) {
-		buffer [offset++] = (deltaNibble << 4 | lengthNibble) & 0xFF;
-		assert(offset < *length);
+			buffer [offset++] = (deltaNibble << 4 | lengthNibble) & 0xFF;
+			assert(offset < *length);
 		}
 		else offset++;
 
@@ -439,7 +440,7 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length, bool checkBufferS
 
 		if (!checkBufferSizeOnly) std::memcpy (buffer + offset, opt.value.data(), opt.value.size());
 		offset += opt.value.size();
-		if (!checkBufferSizeOnly) assert(offset < *length);
+		if (!checkBufferSizeOnly) assert(offset <= *length);
 		optNumDelta = opt.number;
 	}
 

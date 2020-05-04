@@ -1,3 +1,4 @@
+#include <arpa/inet.h>
 #include "packet.h"
 #include "cstring"
 #include "log.h"
@@ -21,29 +22,28 @@ int main(int argc, char ** argv)
 
 		coap.clean_options();
 
-		memcpy(opt_value, "/3", 2);
-		coap.add_option(URI_PATH, opt_value, 2);
+		memcpy(opt_value, "3", sizeof(char));
+		coap.add_option(URI_PATH, opt_value, sizeof(char));
 
-		memcpy(opt_value, "/0", 2);
-		coap.add_option(URI_PATH, opt_value, 2);
+		memcpy(opt_value, "0", sizeof(char));
+		coap.add_option(URI_PATH, opt_value, sizeof(char));
 
-		memcpy(opt_value, "/0", 2);
-		coap.add_option(URI_PATH, opt_value, 2);
-
-		size_t len = (size_t)strlen("application/vnd.oma.lwm2m+tlv");
-
-		memcpy(opt_value, "application/vnd.oma.lwm2m+tlv", len);
-		coap.add_option(ACCEPT, opt_value, len);
+		memcpy(opt_value, "0", sizeof(char));
+		coap.add_option(URI_PATH, opt_value, sizeof(char));
+		uint16_t opt = TLV;
+		opt = htons(opt);
+		memcpy(opt_value, &opt, sizeof(uint16_t));
+		coap.add_option(ACCEPT, opt_value, sizeof(uint16_t));
 
 		coap.make_request(CONFIRMABLE, GET,	nullptr, 0);
 
-		size_t length = 256;
-#if 0
+		size_t length = 0;
+
 		if (!coap.serialize (nullptr, &length, true)) {
 			LOG(ERROR, "unable to check buffer size, corrupted message");
 			return 1;
 		}
-#endif
+
 		LOG(DEBUGGING, "length : ", length);
 
 		std::uint8_t * bufferP = new std::uint8_t [length];

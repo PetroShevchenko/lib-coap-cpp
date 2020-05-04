@@ -13,18 +13,18 @@ build: lib examples
 lib:
 	mkdir -p build/lib
 ifeq ($(TARGET),POSIX)
-	cd build/lib &&	cmake ../.. && make -j$(shell nproc)
+	cd build/lib &&	cmake ../.. && make -j$(shell nproc || echo 2)
 else
-	cd build/lib &&	make -f ../../scripts/gmake/$(TARGET)/library.mk -j$(shell nproc)
-	make -f ../../scripts/gmake/$(TARGET)/tests.mk -j$(shell nproc)
+	cd build/lib &&	make -f ../../scripts/gmake/$(TARGET)/library.mk -j$(shell nproc || echo 2)
+	make -f ../../scripts/gmake/$(TARGET)/tests.mk -j$(shell nproc || echo 2)
 endif
 
 examples:
 	mkdir -p build/examples
 ifeq ($(TARGET),POSIX)
-	cd build/examples && cmake ../../examples/POSIX && make -j$(shell nproc)
+	cd build/examples && cmake ../../examples/POSIX && make -j$(shell nproc || echo 2)
 else
-	cd build/examples && make -f ../../examples/$(TARGET)/Makefile -j$(shell nproc)
+	cd build/examples && make -f ../../examples/$(TARGET)/Makefile -j$(shell nproc || echo 2)
 endif
 
 docker-build: scripts/docker/$(DOCKER_FILE)

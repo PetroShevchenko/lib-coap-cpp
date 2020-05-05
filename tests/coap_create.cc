@@ -30,7 +30,7 @@ int main(int argc, char ** argv)
 
 		memcpy(opt_value, "0", sizeof(char));
 		coap.add_option(URI_PATH, opt_value, sizeof(char));
-		uint16_t opt = TLV;
+		uint16_t opt = LWM2M_TLV;
 		opt = htons(opt);
 		memcpy(opt_value, &opt, sizeof(uint16_t));
 		coap.add_option(ACCEPT, opt_value, sizeof(uint16_t));
@@ -60,7 +60,7 @@ int main(int argc, char ** argv)
 		for (size_t i = 0; i < length; i++)
 		{
 			std::clog << static_cast<short>(bufferP[i]) << " ";
-			if (i >= 16 && i % 16 == 0) std::clog << "\n";			
+			if (i >= 16 && i % 16 == 0) std::clog << "\n";
 		}
 		std::clog << "\n";
 		LOG_SET_STREAM_FORMAT(std::ios::dec, std::ios::basefield);

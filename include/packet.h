@@ -126,8 +126,11 @@ enum media_type_e {
 	XML 			= 41,
 	OCTET_STREAM 	= 42,
 	EXI 			= 47,
-	JSON 			= 50,
-	TLV        		= 11542
+	COAP_JSON		= 50,
+	SEML_JSON		= 110,	//application/senml+json
+	SEML_CBOR		= 112,	//application/senml+cbor
+	LWM2M_TLV  		= 11542,//application/vnd.oma.lwm2m+tlv
+	LWM2M_JSON		= 11543	//application/vnd.oma.lwm2m+json
 };
 
 using method_code_t =

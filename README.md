@@ -11,6 +11,10 @@ To build the library lib-coap-cpp you shall use CMake version at least 3.5 and G
 g++ is used as a C++ compiler. It shall be at least version 7.4.
 Docker container technology can be used to build the library and examples, as well as to isolate the CoAP server written in C++.
 
+## License
+This library is provided under Apache license version 2.0.
+LICENSE file contains license terms.
+
 ## Build \& Install
 ### 1.1.Build using docker containers
 If you want to use building in a Docker container you should firstly install Docker.

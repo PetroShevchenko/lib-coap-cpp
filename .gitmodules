@@ -7,3 +7,9 @@
 [submodule "libs/third-party/googletest"]
 	path = libs/third-party/googletest
 	url = https://github.com/google/googletest.git
+[submodule "libs/third-party/SimpleJSON"]
+	path = libs/third-party/SimpleJSON
+	url = https://github.com/nbsdx/SimpleJSON
+[submodule "libs/third-party/cbor-cpp"]
+	path = libs/third-party/cbor-cpp
+	url = https://github.com/naphaso/cbor-cpp.git

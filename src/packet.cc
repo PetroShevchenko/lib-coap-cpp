@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <climits>
 #include <algorithm>
+#include <ctime>
+
 
 LOG_USING_NAMESPACE
 LOG_EXTERN_DECLARE
@@ -494,6 +496,7 @@ void packet::add_option(option_number_t number, const std::uint8_t * value, cons
 bool packet::generate_token(int tokenLength)
 {
 	if (tokenLength < 0 && tokenLength > 8) return false;
+	srand(time(nullptr));
 	for (int i = 0; i < tokenLength; i++)
 	{
 		_message.token[i] = static_cast<std::uint8_t>(rand() % (UCHAR_MAX + 1));
@@ -504,6 +507,7 @@ bool packet::generate_token(int tokenLength)
 
 void packet::generate_message_id()
 {
+	srand(time(nullptr));
 	_message.messageId = static_cast<std::uint16_t>(rand() % (USHRT_MAX + 1));
 }
 

@@ -184,7 +184,7 @@ public:
 
 	static bool deleteInstance(log ** instanceP)
 	{
-		if (instanceP == nullptr || *instanceP == nullptr) return false;		
+		if (instanceP == nullptr || *instanceP == nullptr) return false;
 		delete *instanceP;
 		*instanceP = nullptr;
 		return true;

@@ -14,6 +14,7 @@ Docker container technology can be used to build the library and examples, as we
 ## License
 This library is provided under Apache license version 2.0.
 LICENSE file contains license terms.
+All third-party libraries are added as git modules and distributed under their own licenses.
 
 ## Build \& Install
 ### 1.1.Build using docker containers

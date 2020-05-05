@@ -354,6 +354,10 @@ public:
 	{
 		return _message.payload;
 	}
+	std::vector <option_t> get_message_options() const
+	{
+		return _message.options;
+	}
 	static packet & createInstance();
 	static bool clearInstance(packet &);
 };

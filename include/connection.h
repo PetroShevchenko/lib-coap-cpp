@@ -37,13 +37,14 @@ protected:
     int _descriptor;
     std::uint8_t * _buffer;
     size_t _length;
-    state_t _state;
+    state_t _state; //curent state
+    state_t _next_state; // next state
 	static bool checkNumberSystem(std::size_t start_index, std::size_t end_index,
 									std::string &number_string, const std::string &pattern);
 
 public:
 	connection(std::string hostname, int port):
-	_hostname(hostname), _port(port), _descriptor(0), _state(connection::DISCONNECTED)
+	_hostname(hostname), _port(port), _descriptor(0), _state(DISCONNECTED), _next_state(DISCONNECTED)
 	{
 		_length = BUFFER_MAX_SIZE;
 		_buffer = new uint8_t [_length];
@@ -82,6 +83,18 @@ public:
 	state_t get_state() const
 	{
 		return _state;
+	}
+	state_t get_next_state() const
+	{
+		return _next_state;
+	}
+	void set_state(state_t state)
+	{
+		_state = state;
+	}
+	void set_next_state(state_t next_state)
+	{
+		_next_state = next_state;
 	}
 	std::string get_IPv4Address() const
 	{

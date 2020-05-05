@@ -67,6 +67,13 @@ using level_t = enum {
 	ALL = (1 << INFO)|(1 << DEBUGGING)|(1 << WARNING)|(1 << ERROR)|(1 << CRITICAL)
 };
 
+template <typename T>
+std::ostream & operator<<(std::ostream & os,const std::vector<T> &v)
+{
+	for (auto i : v)
+		os << i << "\t";
+	return os;
+}
 /**
 	\class log
 	\brief A simple logging system

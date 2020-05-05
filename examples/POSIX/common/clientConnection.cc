@@ -40,7 +40,6 @@ clientConnection::~clientConnection()
 {
 	if (_serverIPv6Address != nullptr) delete _serverIPv6Address;
 	if (_serverIPv4Address != nullptr) delete _serverIPv4Address;
-	//LOG_DELETE;
 }
 
 bool clientConnection::fill_buffer(std::uint8_t * data, size_t size)

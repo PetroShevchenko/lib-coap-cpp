@@ -124,7 +124,7 @@ enum media_type_e {
 	TEXT_PLAIN 		= 0,
 	LINK_FORMAT 	= 40,
 	XML 			= 41,
-	OCTET_STREAM 	= 42,
+	OCTET_STREAM 	= 42,	//application/octet-stream
 	EXI 			= 47,
 	COAP_JSON		= 50,
 	SEML_JSON		= 110,	//application/senml+json
@@ -231,7 +231,6 @@ private:
 	void set_option_bitmap (std::uint8_t number);
 	bool is_option_set(std::uint8_t number);
 	bool generate_token(int tokenLength);
-	void generate_message_id();
 
 public:
 	message_t _message;
@@ -251,8 +250,9 @@ public:
 	void add_option(option_number_t number, const std::uint8_t * value, const size_t length);
 	void prepare_answer(message_type_t messageType, std::uint16_t messageId, message_code_t responseCode,
 									const std::uint8_t * payload, const size_t payloadLength);
-	void make_request(message_type_t messageType, message_code_t code,
-								const std::uint8_t * payload, const size_t payloadLength);
+	void make_request(message_type_t messageType, message_code_t code, std::uint16_t messageId,
+								std::size_t tokenLength, const std::uint8_t * payload, const size_t payloadLength);
+	std::uint16_t generate_message_id();
 
 	const option_t * find_options(const std::uint8_t number, size_t * quantity);
 

@@ -505,23 +505,24 @@ bool packet::generate_token(int tokenLength)
 	return true;
 }
 
-void packet::generate_message_id()
+std::uint16_t packet::generate_message_id()
 {
 	srand(time(nullptr));
-	_message.messageId = static_cast<std::uint16_t>(rand() % (USHRT_MAX + 1));
+	return static_cast<std::uint16_t>(rand() % (USHRT_MAX + 1));
 }
 
 /* Before calling of this method you should call add_option to create needed options.
    payload should be in network bytes order
 */
-void packet::make_request(message_type_t messageType, message_code_t code,
-								const std::uint8_t * payload, const size_t payloadLength)
+void packet::make_request(message_type_t messageType, message_code_t code, std::uint16_t messageId,
+								std::size_t tokenLength, const std::uint8_t * payload, const size_t payloadLength)
 {
+	assert(tokenLength <= 8);
 	set_message_version(COAP_VERSION);
 	set_message_type(static_cast<std::uint8_t>(messageType));
-	generate_message_id();
+	set_message_messageId(messageId);
 	set_message_code(static_cast<std::uint8_t>(code));
-	generate_token(8);
+	if (tokenLength > 0) generate_token(tokenLength);
 	_message.payload.clear();
 	if (payloadLength > 0) {
 		for (size_t i = 0; i < payloadLength; i++)

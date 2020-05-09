@@ -7,6 +7,7 @@ using namespace coap;
 LOG_USING_NAMESPACE
 LOG_GLOBAL_DECLARE
 
+#define TOKEN_LENGTH TOKEN_MAX_LENGTH
 
 int main(int argc, char ** argv)
 {
@@ -35,7 +36,7 @@ int main(int argc, char ** argv)
 		memcpy(opt_value, &opt, sizeof(uint16_t));
 		coap.add_option(ACCEPT, opt_value, sizeof(uint16_t));
 
-		coap.make_request(CONFIRMABLE, GET,	nullptr, 0);
+		coap.make_request(CONFIRMABLE, GET,	coap.generate_message_id(), TOKEN_LENGTH, nullptr, 0);
 
 		size_t length = 0;
 

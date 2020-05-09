@@ -137,12 +137,12 @@ int main(int argc, char ** argv)
 
 	try {
 
-		std::fstream file("coap-client.log", std::ios::out|std::ios::app);
-		//LOG_CREATE(ALL, file);
+		std::fstream log_file("coap-client.log", std::ios::out|std::ios::app);
+		//LOG_CREATE(ALL, log_file);
 		LOG_CREATE(ALL, std::clog);
 
-		clientConnection udp(ipv4_address_default, 5683);
-		socket_descriptor = udp.get_descriptor();
+		clientConnection udp(ip_address, server_port);
+
 		static packet & pdu = new_packet();
 		uriClientEndpoint ep("data/example.bin", &udp, &pdu, &tv.tv_sec);
 
@@ -152,8 +152,10 @@ int main(int argc, char ** argv)
 			exit(EXIT_FAILURE);
 		}
 
-		ep.start();
+		socket_descriptor = udp.get_descriptor();
+		LOG(DEBUGGING,"socket_descriptor = ",socket_descriptor);
 
+		ep.start();
 
 		while(!quit)
 		{
@@ -175,15 +177,14 @@ int main(int argc, char ** argv)
             }
             if (FD_ISSET(0, &read_descriptors)) { //was entered something from stdin
                 LOG(DEBUGGING,"was entered something from stdin");
-                char c;
+/*                char c;
                 while (std::cin.get(c))
-                    std::cout << c;
+                    std::cout << c;*/
+                continue;
             }
             if (FD_ISSET(socket_descriptor, &read_descriptors)) { //was received something from a socket
-            	if(!udp.receive()) {
-            		LOG(ERROR, "Unable to receive data from a socket");
-            		continue;
-            	}
+				LOG(DEBUGGING,"was received something from a socket");
+           		ep.set_received(true);
             }
 
 			ep.transaction_step();
@@ -193,14 +194,20 @@ int main(int argc, char ** argv)
 
 		udp.disconnect();
 		delete_packet(pdu);
-		file.close();
+		log_file.close();
 		LOG_DELETE;
 	}
 	catch(error &err)
 	{
 		std::cerr << "The exception " << err.get_code() << " was cought " << std::endl;
+		std::cerr << "Message : " << err.get_message() << std::endl;
 		exit(EXIT_FAILURE);
 	}
+	catch (std::bad_alloc &err)
+  	{
+    	std::cerr << "The exception bad_alloc was caught" << std::endl;
+    	std::cerr << "Message :" << err.what() << std::endl;
+  	}
 	catch(...)
 	{
 		std::cerr << "Unknown exception was cought" << std::endl;

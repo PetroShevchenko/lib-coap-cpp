@@ -2,6 +2,8 @@
 
 namespace coap {
 
+error connection::_error;
+
 bool connection::checkNumberSystem (std::size_t start_index, std::size_t end_index,
 									std::string &number_string, const std::string &pattern)
 {

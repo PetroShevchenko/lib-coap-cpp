@@ -24,22 +24,14 @@ namespace coap {
 error clientConnection::_error;
 
 clientConnection::clientConnection(std::string hostname, int port)
-:connection(hostname,port), _serverIPv6Address(nullptr), _serverIPv4Address(nullptr)
+:connection(hostname,port), _serverIPv6Address(new struct sockaddr_in6), _serverIPv4Address(new struct sockaddr_in), _use_IPv6(false)
 {
-	if (_IPv6Address.size() != 0)
-	{
-		_serverIPv6Address = new struct sockaddr_in6;
-	}
-	else if (_IPv4Address.size() != 0)
-	{
-		_serverIPv4Address = new struct sockaddr_in;
-	}
 }
 
 clientConnection::~clientConnection()
 {
-	if (_serverIPv6Address != nullptr) delete _serverIPv6Address;
-	if (_serverIPv4Address != nullptr) delete _serverIPv4Address;
+	delete _serverIPv6Address;
+	delete _serverIPv4Address;
 }
 
 bool clientConnection::fill_buffer(std::uint8_t * data, size_t size)
@@ -60,19 +52,25 @@ bool clientConnection::fill_buffer(std::uint8_t * data, size_t size)
 bool clientConnection::establish()
 {
 	struct in_addr * inp;
+	//LOG(DEBUGGING,"_IPv6Address.size(1) = ", _IPv6Address.size());
+	//LOG(DEBUGGING,"_IPv4Address.size(1) = ", _IPv4Address.size());
+
 	if (!hostname2IPAddress()) {
 		LOG(ERROR,"Unable to resolve IP address");
 		_error.set_code(RESOLVE_ADDRESS);
 		return false;
 	}
-	if (_serverIPv6Address != nullptr)
+	//LOG(DEBUGGING,"_IPv6Address.size(2) = ", _IPv6Address.size());
+	//LOG(DEBUGGING,"_IPv4Address.size(2) = ", _IPv4Address.size());
+
+	if (_use_IPv6)
 	{
 	    _serverIPv6Address->sin6_family = AF_INET6;
 	    _serverIPv6Address->sin6_port = htons(_port);
 	    inp =  (in_addr *)(&_serverIPv6Address->sin6_addr.s6_addr);
 	    inet_aton (_IPv6Address.c_str(), inp);
 	}
-	else if (_serverIPv4Address != nullptr)
+	else
 	{
 	    _serverIPv4Address->sin_family = AF_INET;
 	    _serverIPv4Address->sin_port = htons(_port);
@@ -80,7 +78,7 @@ bool clientConnection::establish()
 	    inet_aton (_IPv4Address.c_str(), inp);
 	}
 
-	_descriptor = socket (_serverIPv6Address != nullptr ? AF_INET6: AF_INET, SOCK_DGRAM, 0);
+	_descriptor = socket ((_use_IPv6 ? AF_INET6: AF_INET), SOCK_DGRAM, 0);
 
     if (_descriptor < 0) {
     	LOG(ERROR,"Can not create a new socket");
@@ -103,14 +101,22 @@ bool clientConnection::send()
 	ssize_t sent;
 	struct sockaddr * sap;
 	size_t sz;
-	if (_serverIPv6Address != nullptr) {
+	//LOG(DEBUGGING,"_serverIPv6Address =", _serverIPv6Address);
+	//LOG(DEBUGGING,"_serverIPv4Address =", _serverIPv4Address);
+	if (_use_IPv6) {
 		sap = (struct sockaddr *)_serverIPv6Address;
 		sz = sizeof(*_serverIPv6Address);
 	}
-	else if (_serverIPv4Address != nullptr) {
+	else
+	{
 		sap = (struct sockaddr *)_serverIPv4Address;
 		sz = sizeof(*_serverIPv4Address);
 	}
+	LOG(DEBUGGING,"sap =", sap);
+	LOG(DEBUGGING,"sz =", sz);
+	LOG(DEBUGGING,"_buffer =", _buffer);
+	LOG(DEBUGGING,"_length =", _length);
+
 	sent = sendto (_descriptor, _buffer, _length, MSG_CONFIRM, sap, sz);
 	if (sent != (ssize_t)_length) {
 		LOG(ERROR,"The buffer was incompletly sent, length = ", _length, " , sent = ", sent);
@@ -152,10 +158,12 @@ bool clientConnection::hostname2IPAddress()
 	if (_hostname.size() == 0) return false;
 	if (connection::isIPv6Address(_hostname)) {
 		_IPv6Address = _hostname;
+		_use_IPv6 = true;
 		return true;
 	}
 	if (connection::isIPv4Address(_hostname)) {
 		_IPv4Address = _hostname;
+		_use_IPv6 = false;
 		return true;
 	}
 	memset(address_str, 0, sizeof(address_str));
@@ -174,10 +182,12 @@ bool clientConnection::hostname2IPAddress()
 					(void *) & ((struct sockaddr_in6 *) p->ai_addr)->sin6_addr, address_str, sizeof(address_str));
 			if (p->ai_family == AF_INET6) {
 				_IPv6Address = address_str;
+				_use_IPv6 = true;
 				status = true;
 			}
 			else if (p->ai_family == AF_INET) {
 				_IPv4Address = address_str;
+				_use_IPv6 = false;
 				status = true;
 			}
 		}

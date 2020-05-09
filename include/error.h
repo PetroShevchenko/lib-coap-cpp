@@ -21,6 +21,7 @@ enum
 	INCOMPLETE_SEND,
 	RECEIVE,
 	RESOLVE_ADDRESS,
+	PORT_NUMBER,
 	UNKNOWN
 };
 #define ERROR_CODE_MIN OK
@@ -46,6 +47,7 @@ protected:
 		"The buffer was incompletely sent",
 		"Receive error",
 		"Unable to resolve IP address",
+		"Wrong port number",
 		"Unknown error"
 	};
 

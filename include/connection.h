@@ -5,6 +5,8 @@
 #include <cstddef>
 #include <iostream>
 #include <vector>
+#include <climits>
+#include "error.h"
 
 namespace coap{
 
@@ -13,6 +15,9 @@ enum {
 };
 
 class connection {
+
+private:
+	static error _error;
 
 public:
 	using state_t =
@@ -43,12 +48,18 @@ protected:
 									std::string &number_string, const std::string &pattern);
 
 public:
+
 	connection(std::string hostname, int port):
 	_hostname(hostname), _port(port), _descriptor(0), _state(DISCONNECTED), _next_state(DISCONNECTED)
 	{
+		if (port < 0 || port > USHRT_MAX) {
+			_error.set_code(PORT_NUMBER);
+			throw &_error;
+		}
 		_length = BUFFER_MAX_SIZE;
 		_buffer = new uint8_t [_length];
 	}
+
 	virtual ~connection()
 	{
 		delete [] _buffer;
@@ -95,6 +106,10 @@ public:
 	void set_next_state(state_t next_state)
 	{
 		_next_state = next_state;
+	}
+	void set_length(size_t length)
+	{
+		_length = length;;
 	}
 	std::string get_IPv4Address() const
 	{

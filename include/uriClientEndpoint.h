@@ -35,6 +35,8 @@ private:
 	packet * _pduP; // COAP packet
 	unsigned long _attempts; // attempt counter
 	time_t * _tv_secP; // timeout in seconds
+	std::uint16_t _mid; // message ID
+	bool _received; // receive packet flag
 
 public:
 	//bool request(method_code_t method, std::string params);
@@ -57,10 +59,23 @@ public:
 	{
 		_next_state = ERROR;
 	}
+	void set_received(bool state)
+	{
+		_received = state;
+	}
+	bool get_received() const
+	{
+		return _received;
+	}
+	void set_tv_sec(time_t seconds)
+	{
+		if (seconds > 60) seconds = 60;
+		*_tv_secP = seconds;
+	}
 
 public:
 	uriClientEndpoint(std::string path, connection * connectionP, packet * pduP, time_t * timeoutP) :
-	endpoint(path), _destUri(path), _state(IDLE), _next_state(IDLE), _connP(connectionP), _pduP(pduP), _attempts(0), _tv_secP(timeoutP)
+	endpoint(path), _destUri(path), _state(IDLE), _next_state(IDLE), _connP(connectionP), _pduP(pduP), _attempts(0), _tv_secP(timeoutP), _mid(0), _received(false)
 	{
 	}
 	~uriClientEndpoint()

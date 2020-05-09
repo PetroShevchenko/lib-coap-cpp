@@ -9,6 +9,7 @@ class clientConnection : public connection {
 protected:
 	struct sockaddr_in6 * _serverIPv6Address;
 	struct sockaddr_in * _serverIPv4Address;
+	bool _use_IPv6;
 
 	static error _error;
 

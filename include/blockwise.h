@@ -10,7 +10,8 @@ namespace coap {
 
 class blockwise {
 private:
-	std::vector<std::uint8_t> _data;
+	//std::vector<std::uint8_t> _data;
+	static unsigned int size_to_sizeoption(unsigned int size);
 
 protected:
 	std::uint32_t _number;	// block number

@@ -170,9 +170,8 @@ int main(int argc, char ** argv)
 
             LOG(DEBUGGING, "return_code is ",return_code);
 
-            if (return_code == 0) {
+            if (return_code == 0 && tv.tv_sec != 0) {
                 LOG(ERROR,"receive timeout is over");
-                //continue;
             }
             if (return_code == -1) {
                 LOG(ERROR,"the error happened: select");

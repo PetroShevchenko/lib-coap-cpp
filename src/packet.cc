@@ -43,7 +43,6 @@ bool packet::clearInstance(packet & instance)
 
 packet::packet()
 {
-	LOG_SET_LEVEL(ALL);
 	LOG(DEBUGGING,"Entering");
 
 	_message.headerInfo.asByte = 0;
@@ -143,11 +142,6 @@ bool packet::parse_header(const std::uint8_t * buffer, const size_t length)
 		return false;
 	}
 	set_message_headerInfo(buffer[0]);
-	LOG_SET_STREAM_FORMAT(std::ios::hex, std::ios::basefield);
-	LOG(DEBUGGING,"buffer[0]=",static_cast<int>(buffer[0]));
-	LOG(DEBUGGING,"get_message_version() =",static_cast<int>(get_message_version()));
-	LOG(DEBUGGING,"get_message_type() =",static_cast<int>(get_message_type()));
-	LOG(DEBUGGING,"get_message_tokenLength() =",static_cast<int>(get_message_tokenLength()));
 
 	if (COAP_VERSION != get_message_version()) {
 		_error.set_code(PROTOCOL_VERSION);

@@ -10,9 +10,6 @@ namespace coap {
 
 class uri {
 
-private:
-	//LOG_CREATE(ALL, std::clog);
-
 public:
 	enum {
 		URI_MAX_SEGMENTS = 4 // for example: 4 segments equals '/first/second/third/forth' or '/0/1/2/3'

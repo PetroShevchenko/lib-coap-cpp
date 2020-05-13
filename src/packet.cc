@@ -1,12 +1,13 @@
-#include "packet.h"
-#include "log.h"
-#include "error.h"
 #include <cstring>
 #include <cstdlib>
 #include <climits>
 #include <algorithm>
 #include <ctime>
+#include <arpa/inet.h>
 
+#include "packet.h"
+#include "log.h"
+#include "error.h"
 
 LOG_USING_NAMESPACE
 LOG_EXTERN_DECLARE
@@ -155,10 +156,10 @@ bool packet::parse_header(const std::uint8_t * buffer, const size_t length)
 	}
 	set_message_code(buffer[1]);
 	if (get_is_little_endian()) {
-		set_message_messageId(static_cast<std::uint16_t>(buffer[2] | (buffer[3] << 8)));
+		set_message_messageId(static_cast<std::uint16_t>(buffer[3] | (buffer[2] << 8)));
 	}
 	else {
-		set_message_messageId(static_cast<std::uint16_t>(buffer[3] | (buffer[2] << 8)));
+		set_message_messageId(static_cast<std::uint16_t>(buffer[2] | (buffer[3] << 8)));
 	}
 	LOG(DEBUGGING, "Leaving");
 	return true;
@@ -191,7 +192,10 @@ bool packet::parse_options(const std::uint8_t * buffer, const size_t length)
 	option_t opt = {0};
 	uint16_t optDelta = 0;
 	uint16_t optLength = 0;
+	uint16_t optNumber = 0;
+	LOG(DEBUGGING,"Entering");
 	LOG(DEBUGGING,"optionsOffset = ", optionsOffset);
+	clean_options();
 
 	for (i = optionsOffset; buffer[i] != _message.payloadMarker && i < length; i += optLength)
 	{
@@ -244,8 +248,8 @@ bool packet::parse_options(const std::uint8_t * buffer, const size_t length)
 			LOG(ERROR,"Length of option is too long");
 			return false;
 		}
-
-		opt.number = optDelta;
+		optNumber += optDelta;
+		opt.number = optNumber;
 
 		LOG(DEBUGGING,"optLength = ", optLength);
 		for (int j = 0; j < optLength; j++)
@@ -258,6 +262,7 @@ bool packet::parse_options(const std::uint8_t * buffer, const size_t length)
 		opt = {0};
 	}
 	_message.payloadOffset = i + sizeof(_message.payloadMarker);
+	LOG(DEBUGGING,"Leaving");
 	return true;
 }
 
@@ -303,19 +308,27 @@ bool packet::is_option_set(std::uint8_t number)
 }
 
 
-const packet::option_t * packet::find_options(const std::uint8_t number, size_t * quantity)
+const packet::option_t * packet::find_options(const std::uint16_t number, size_t * quantity)
 {
 	int min = 0 , max = _message.options.size(), mid  = 0;
 	assert(quantity != nullptr);
-
+	LOG(DEBUGGING, "Entering");
 	*quantity = 0;
+	
+	std::sort(_message.options.begin(), _message.options.end(), compare_options);
+	for(auto opt: _message.options)
+	{
+		LOG(DEBUGGING, "opt = ", (int)opt.number);
+	}
 
+	LOG(DEBUGGING,"compared option number", (int)number);
+	
 	while (min <= max)
 	{
 		mid = (min + max) >> 1;
-
+		LOG(DEBUGGING,"current option number is ", _message.options[mid].number);
 		if ( _message.options[mid].number < number) {
-			max = mid + 1;
+			min = mid + 1;
 		}
 		else if (_message.options[mid].number > number) {
 			max = mid - 1;
@@ -333,9 +346,11 @@ const packet::option_t * packet::find_options(const std::uint8_t number, size_t 
 			{
 				(*quantity)++;
 			}
-			return &_message.options[min];
+			LOG(DEBUGGING, "Leaving");
+			return &_message.options[mid];
 		}
 	}
+	LOG(DEBUGGING, "Leaving");
 	return nullptr;
 }
 
@@ -370,14 +385,14 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length, bool checkBufferS
 	}
 	offset = MESSAGE_ID_OFFSET;
 
-	if (!checkBufferSizeOnly) {
+	if (!checkBufferSizeOnly) {	
 		if (get_is_little_endian()) {
-			buffer [offset] 	= _message.messageId & 0xFF;
-			buffer [offset + 1]	= (_message.messageId >> 8 ) & 0xFF;
-		}
-		else {
 			buffer [offset] 	= (_message.messageId >> 8 ) & 0xFF;
 			buffer [offset + 1] = _message.messageId & 0xFF;
+		}
+		else {
+			buffer [offset] 	= _message.messageId & 0xFF;
+			buffer [offset + 1]	= (_message.messageId >> 8 ) & 0xFF;
 		}
 	}
 
@@ -518,6 +533,7 @@ void packet::make_request(message_type_t messageType, message_code_t code, std::
 								std::size_t tokenLength, const std::uint8_t * payload, const size_t payloadLength)
 {
 	assert(tokenLength <= 8);
+	LOG(DEBUGGING,"Entering");
 	set_message_version(COAP_VERSION);
 	set_message_type(static_cast<std::uint8_t>(messageType));
 	set_message_messageId(messageId);
@@ -530,6 +546,7 @@ void packet::make_request(message_type_t messageType, message_code_t code, std::
 			_message.payload.push_back(payload[i]);
 		}
 	}
+	LOG(DEBUGGING,"Leaving");
 }
 
 void packet::prepare_answer(message_type_t messageType, std::uint16_t messageId, message_code_t responseCode,

@@ -168,7 +168,7 @@ public:
 			} asBitfield;
 			#pragma pack(pop)
 		} header;
-		std::uint8_t number;
+		std::uint16_t number;
 		std::vector<std::uint8_t> value;
 	};
 
@@ -232,6 +232,8 @@ private:
 	bool is_option_set(std::uint8_t number);
 	bool generate_token(int tokenLength);
 
+	static bool compare_options (const option_t &a, const option_t &b) { return (a.number < b.number); }
+
 public:
 	message_t _message;
 
@@ -254,7 +256,7 @@ public:
 								std::size_t tokenLength, const std::uint8_t * payload, const size_t payloadLength);
 	std::uint16_t generate_message_id();
 
-	const option_t * find_options(const std::uint8_t number, size_t * quantity);
+	const option_t * find_options(const std::uint16_t number, size_t * quantity);
 
 	std::uint32_t * get_option_bitmap()
 	{

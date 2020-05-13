@@ -1,5 +1,6 @@
 #include <cmath>
 #include <cassert>
+#include <arpa/inet.h>
 #include "blockwise.h"
 #include "log.h"
 
@@ -11,7 +12,8 @@ namespace coap {
 enum {
 	BLOCK_SZX_MASK 	= 0x7,
 	BLOCK_M_BIT		= 3,
-	BLOCK_NUM_SHIFT	= 4
+	BLOCK_NUM_SHIFT	= 4,
+	BLOCK_MAX_SIZE 	= 2048
 };
 #if 0
 blockwise::blockwise():_number(0),_offset(0),_size(0),_more(false)
@@ -22,7 +24,7 @@ bool blockwise::decode_block_option(const packet::option_t * optionP)
 {
 	bool status = false;
 	if (optionP->number != BLOCK_1
-		|| optionP->number != BLOCK_2) {
+		&& optionP->number != BLOCK_2) {
 		LOG(DEBUGGING, "There are no any BLOCK options");
 		return false;
 	}
@@ -78,11 +80,95 @@ bool blockwise::decode_block_option(const packet::option_t * optionP)
 	return status;
 }
 
+bool blockwise::encode_block_option(packet::option_t * optionP)
+{
+	assert(optionP != nullptr);
+	std::uint8_t tmp = 0;
+	LOG(DEBUGGING,"Entering");
+	if (optionP->number != BLOCK_1
+		&& optionP->number != BLOCK_2) {
+		LOG(DEBUGGING, "There are no any BLOCK options");
+		return false;
+	}
+	if (_size % 16 || _size > BLOCK_MAX_SIZE) {
+		LOG(DEBUGGING,"Invalid block size value");
+		return false;
+	}
+	if (_number < 16) {
+		tmp = (std::uint8_t)(_size >> 5) & BLOCK_SZX_MASK;
+		if (_more) {
+			tmp |= (std::uint8_t)(1 << BLOCK_M_BIT);	
+		}
+		else {
+			tmp &= ~((std::uint8_t)(1 << BLOCK_M_BIT));
+		}
+		tmp |= (std::uint8_t)(_number << BLOCK_NUM_SHIFT);
+		optionP->value.push_back(tmp);
+	}
+	else {
+		bool little_endian = packet::is_little_endian_byte_order();
+		if (_number < 4096) {
+			if (little_endian == true) {
+				tmp = (std::uint8_t)(_number & 0xFF) >> BLOCK_NUM_SHIFT;
+				tmp |= ((std::uint8_t)((_number >> 8) & 0xFF)) << BLOCK_NUM_SHIFT;//Little endian
+				optionP->value.push_back(tmp);
+				tmp = (std::uint8_t)(_number & 0xF) << BLOCK_NUM_SHIFT;
+			}
+			else {
+				tmp = (std::uint8_t)((_number >> 24) & 0xFF) >> BLOCK_NUM_SHIFT;				
+				tmp |= ((std::uint8_t)((_number >> 16) & 0xFF)) << BLOCK_NUM_SHIFT;//Big endian
+				optionP->value.push_back(tmp);
+				tmp = (std::uint8_t)((_number >> 24) & 0xF) << BLOCK_NUM_SHIFT;
+			}
+			tmp |= (std::uint8_t)(_size >> 5) & BLOCK_SZX_MASK;
+			if (_more) {
+				tmp |= (std::uint8_t)(1 << BLOCK_M_BIT);	
+			}
+			else {
+				tmp &= ~((std::uint8_t)(1 << BLOCK_M_BIT));
+			}			
+			optionP->value.push_back(tmp);
+		}
+		else if (_number < 1048576) {//TODO
+			if (little_endian == true) {
+				tmp = (std::uint8_t)(_number & 0xFF);
+				optionP->value.push_back(tmp);
+				tmp = (std::uint8_t)((_number >> 8) & 0xFF) >> BLOCK_NUM_SHIFT;
+				tmp |= ((std::uint8_t)((_number >> 16) & 0xFF)) << BLOCK_NUM_SHIFT;//Little endian
+				optionP->value.push_back(tmp);
+				tmp = (std::uint8_t)((_number >> 8) & 0xF) << BLOCK_NUM_SHIFT;
+			}
+			else {
+				tmp = (std::uint8_t)((_number >> 24) & 0xFF);
+				optionP->value.push_back(tmp);
+				tmp = (std::uint8_t)((_number >> 16) & 0xFF) >> BLOCK_NUM_SHIFT;
+				tmp |= ((std::uint8_t)((_number >> 8) & 0xFF)) << BLOCK_NUM_SHIFT;//Big endian
+				optionP->value.push_back(tmp);
+				tmp = (std::uint8_t)((_number >> 16) & 0xF) << BLOCK_NUM_SHIFT;
+			}
+			tmp |= (std::uint8_t)(_size >> 5) & BLOCK_SZX_MASK;
+			if (_more) {
+				tmp |= (std::uint8_t)(1 << BLOCK_M_BIT);	
+			}
+			else {
+				tmp &= ~((std::uint8_t)(1 << BLOCK_M_BIT));
+			}
+			optionP->value.push_back(tmp);
+		}
+		else {
+			LOG(DEBUGGING, "Invalid block number value");
+			return false;
+		}
+	}
+	LOG(DEBUGGING,"Leaving");
+	return true;
+}
+
 bool blockwise::decode_size_option(const packet::option_t * optionP)
 {
 	bool status = false;
 	if (optionP->number != SIZE_1
-		|| optionP->number != SIZE_2) {
+		&& optionP->number != SIZE_2) {
 		LOG(DEBUGGING, "There are no any SIZE options");
 		return false;
 	}
@@ -90,34 +176,34 @@ bool blockwise::decode_size_option(const packet::option_t * optionP)
 	switch(optionP->value.size())
 	{
 		case 1:
-			_offset += optionP->value[0];
+			_total = optionP->value[0];
 			break;
 
 		case 2:
 			if (little_endian == true) {
-				_offset += optionP->value[0] << 8 | optionP->value[1];//Little endian
+				_total = optionP->value[0] << 8 | optionP->value[1];//Little endian
 			}
 			else {
-				_offset += optionP->value[0] >> 8 | optionP->value[1];//Big endian
+				_total = optionP->value[0] >> 8 | optionP->value[1];//Big endian
 			}
 			break;
 
 		case 3:
 			if (little_endian == true) {
-				_offset += optionP->value[0] << 16 | optionP->value[1] << 8 | optionP->value[2];//Little endian
+				_total = optionP->value[0] << 16 | optionP->value[1] << 8 | optionP->value[2];//Little endian
 			}
 			else {
-				_offset += optionP->value[0] >> 16 | optionP->value[1] >> 8 | optionP->value[2];//Big endian
+				_total = optionP->value[0] >> 16 | optionP->value[1] >> 8 | optionP->value[2];//Big endian
 			}
 			break;
 
 		case 4:
 			if (little_endian == true) {
-				_offset += optionP->value[0] << 24 | optionP->value[1] << 16
+				_total = optionP->value[0] << 24 | optionP->value[1] << 16
 							| optionP->value[2] << 8 | optionP->value[3];//Little endian
 			}
 			else {
-				_offset += optionP->value[0] >> 24 | optionP->value[1] >> 16
+				_total = optionP->value[0] >> 24 | optionP->value[1] >> 16
 							| optionP->value[2] >> 8 | optionP->value[3];//Big endian
 			}
 			break;
@@ -154,6 +240,84 @@ bool block1::get_header (packet & pack)
 		LOG(DEBUGGING, "Unable to decode BLOCK1 option");
 		return false;
 	}
+	return true;
+}
+
+bool block1::set_header (std::uint16_t port, uri & uri, packet & pack)
+{
+	// clean all options
+	pack.clean_options();
+	// add option URI_PORT
+	port = htons(port);
+	pack.add_option(URI_PORT, (const std::uint8_t *)&port, sizeof(std::uint16_t));
+	// add options URI_PATH
+	for (auto opt : uri.get_uri().asString)
+	{
+		pack.add_option(URI_PATH, (const std::uint8_t *)opt.c_str(), opt.length());
+	}
+	// if it is not the first block
+	if (_number != 0) {
+		packet::option_t option;
+		option.number = BLOCK_1;
+		if (!encode_block_option(&option)) {
+			LOG(DEBUGGING,"Unable to encode BLOCK1 option");
+			return false;
+		}
+		pack.add_option ((option_number_t)option.number, (const std::uint8_t *)option.value.data(), option.value.size());
+	}
+	return true;
+}
+
+bool block2::get_block2_option(packet & pack, size_t * optionQuantityP, const packet::option_t ** optionPP)
+{
+	assert(optionQuantityP != nullptr);
+	assert(optionPP != nullptr);
+	*optionPP = pack.find_options(BLOCK_2, optionQuantityP);
+	if (*optionPP == nullptr) {
+		return false;
+	}
+	return true;
+}
+
+bool block2::get_header (packet & pack)
+{
+	size_t optionQuantity;
+	const packet::option_t * optionP;
+	if (get_block2_option(pack, &optionQuantity, &optionP) == false) {
+		LOG(DEBUGGING, "There is no BLOCK 2 option in the packet");
+		return false;
+	}
+	if (decode_block_option(optionP) == false) {
+		LOG(DEBUGGING, "Unable to decode BLOCK2 option");
+		return false;
+	}
+	return true;
+}
+
+bool block2::set_header (std::uint16_t port, uri & uri, packet & pack)
+{
+	LOG(DEBUGGING,"Entering");
+	// clean all options
+	pack.clean_options();
+	// add option URI_PORT
+	port = htons(port);
+	pack.add_option(URI_PORT, (const std::uint8_t *)&port, sizeof(std::uint16_t));
+	// add options URI_PATH
+	for (auto opt : uri.get_uri().asString)
+	{
+		pack.add_option(URI_PATH, (const std::uint8_t *)opt.c_str(), opt.length());
+	}
+	// if it is not the first block
+	if (_number != 0) {
+		packet::option_t option;
+		option.number = BLOCK_2;
+		if (!encode_block_option(&option)) {
+			LOG(DEBUGGING,"Unable to encode BLOCK1 option");
+			return false;
+		}
+		pack.add_option ((option_number_t)option.number, (const std::uint8_t *)option.value.data(), option.value.size());
+	}
+	LOG(DEBUGGING,"Leaving");
 	return true;
 }
 

@@ -88,4 +88,24 @@ To install the firmware you should copy it to the device
 * cp build/examples/coap-client/coap-client.bin /run/media/$USER/DIS_H747XI
 
 ## Quickstart
-TODO
+Let's consider an example of a coap client for POSIX.
+The client loads some file from a COAP server using BLOCK-WISE transfers.
+#### Server
+Use an example cf-simplefile-server from the repository of Eclipse Californium as a COAP file server.
+Read README.md from https://github.com/eclipse/californium to build the server.
+Prepare some file to download from the server by COAP BLOCK-WISE protocol:
+* cp example.bin ~/californium/demo-apps/cf-simplefile-server/target/data 
+Then launch cf-simplefile-server using following sequense of commands:
+* cd ~/californium/demo-apps/cf-simplefile-server/target
+* java -jar cf-simplefile-server-2.3.0-SNAPSHOT.jar
+
+#### Client
+Build the whole lib-coap-cpp project or only examples if the library was built earlier:
+* cd ~/lib-coap-cpp
+* make examples
+When the server is running you should launch the client:
+* cd ~/lib-coap-cpp/build/examples/coap-client
+* ./coap-client -p 5683 -4 127.0.0.1 -f data/example.bin
+When the file is loaded you can see following message "Block-wise transfer completed".
+If the file is not received you will see another message "An error occurred while receiving the file".
+To read more details please open the log-file coap-client.log.

@@ -22,6 +22,15 @@ enum
 	RECEIVE,
 	RESOLVE_ADDRESS,
 	PORT_NUMBER,
+	CREATE_BLOCK_OPTION,
+	COAP_SERIALIZE,
+	COAP_SEND,
+	COAP_TIMEOUT,
+	COAP_RECEIVE,
+	RECEIVED_PACKET,
+	URI_NOT_FOUND,
+	SERVER_CODE,
+	DECODE_BLOCK_OPTION,
 	UNKNOWN
 };
 #define ERROR_CODE_MIN OK
@@ -48,6 +57,15 @@ protected:
 		"Receive error",
 		"Unable to resolve IP address",
 		"Wrong port number",
+		"Unable to create block-wise option",
+		"Unable to serialize the COAP packet",
+		"Unable to send the COAP packet",
+		"The COAP server does not response",
+		"Unable to receive the COAP packet",
+		"Unable to deserialize the received packet",
+		"URI is not found",
+		"The COAP server sent error code",
+		"Unable to decode block-wise option",
 		"Unknown error"
 	};
 

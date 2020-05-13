@@ -11,7 +11,7 @@
 namespace coap{
 
 enum {
-	BUFFER_MAX_SIZE = 1024
+	BUFFER_MAX_SIZE = 2500
 };
 
 class connection {

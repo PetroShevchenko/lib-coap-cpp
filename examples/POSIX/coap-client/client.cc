@@ -27,6 +27,7 @@ const unsigned int server_port_default = 5683;
 const unsigned int client_port_default = 56083;
 const std::string command_file_name_default = "coap-commands.run";
 
+
 static bool quit = false;
 static unsigned int server_port = server_port_default;
 static unsigned int client_port = client_port_default;
@@ -34,7 +35,7 @@ static bool use_ipv6 = true;
 static bool use_interactive_mode = true;
 static std::string ip_address = ipv6_address_default;
 static std::string command_file_name = command_file_name_default;
-
+static std::string downloaded_file_name = "data/example.bin";
 
 static void usage()
 {
@@ -47,7 +48,7 @@ static void usage()
 	std::cerr << "-6,--ipv6\t<ADDRESS>\tset the IPv6 address of the CoAP server. Default: ::1" << std::endl;
 	std::cerr << "-c,--client\t<PORT_NUMBER>\tset the client port number. Default: 56083" << std::endl;
 	std::cerr << "-i,--interactive\t\tset the interactive mode of client running" << std::endl;
-	std::cerr << "-f,--file\t<FILE_NAME>\tset the name of the file containing the sequence of commands" << std::endl;
+	std::cerr << "-f,--file\t<FILE_NAME>\tset the name of the downloaded file" << std::endl;
 }
 
 static bool parse_arguments(int argc, char ** argv)
@@ -111,8 +112,8 @@ static bool parse_arguments(int argc, char ** argv)
 				break;
 			case 'f':
 				use_interactive_mode = false;
-				command_file_name = optarg;
-				std::clog << "-f " << command_file_name << std::endl;
+				downloaded_file_name = optarg;
+				std::clog << "-f " << downloaded_file_name << std::endl;
 				break;
 			default:
 				return false;
@@ -138,13 +139,15 @@ int main(int argc, char ** argv)
 	try {
 
 		std::fstream log_file("coap-client.log", std::ios::out|std::ios::app);
-		//LOG_CREATE(ALL, log_file);
-		LOG_CREATE(ALL, std::clog);
+		LOG_CREATE(NONE, log_file);
+		LOG_SET_LEVEL(logging::INFO);
+		LOG_SET_LEVEL(logging::ERROR);
+		//LOG_CREATE(ALL, std::clog);
 
 		clientConnection udp(ip_address, server_port);
 
 		static packet & pdu = new_packet();
-		uriClientEndpoint ep("data/example.bin", &udp, &pdu, &tv.tv_sec);
+		uriClientEndpoint ep(downloaded_file_name, &udp, &pdu, &tv.tv_sec);
 
 		if(!udp.establish()) {
 			LOG(ERROR,"Unable to establish a connection. Exit");

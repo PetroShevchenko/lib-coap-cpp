@@ -13,3 +13,6 @@
 [submodule "libs/third-party/cbor-cpp"]
 	path = libs/third-party/cbor-cpp
 	url = https://github.com/naphaso/cbor-cpp.git
+[submodule "libs/third-party/STM32CubeH7"]
+	path = libs/third-party/STM32CubeH7
+	url = https://github.com/STMicroelectronics/STM32CubeH7

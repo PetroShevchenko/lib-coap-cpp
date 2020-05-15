@@ -1,6 +1,10 @@
 #include <cmath>
 #include <cassert>
+#ifdef STM32H747I_DISCO
+#include "lwip.h"
+#else
 #include <arpa/inet.h>
+#endif
 #include "blockwise.h"
 #include "log.h"
 

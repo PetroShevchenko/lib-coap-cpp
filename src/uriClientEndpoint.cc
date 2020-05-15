@@ -1,4 +1,8 @@
+#ifdef STM32H747I_DISCO
+#include "lwip.h"
+#else
 #include <arpa/inet.h>
+#endif
 #include "endpoint.h"
 #include "uriClientEndpoint.h"
 #include "log.h"

@@ -27,13 +27,12 @@ bool uri::path_to_uri()
 {
 	LOG(DEBUGGING,"Entering");
 	char * token = nullptr;
-	char * p = nullptr;
 
 	token = new char [_path.size() + 1];
 
 	strncpy(token, _path.c_str(), _path.size() + 1);
 
-	token = strtok_r (token, "/", &p);
+	token = strtok(token, "/");
 
 	if (token == nullptr) {
 		LOG(ERROR,"Wrong value of variable _patch");
@@ -55,7 +54,7 @@ bool uri::path_to_uri()
 		else if (_uri.type == URI_TYPE_INTEGER){
 			_uri.asInteger.push_back(strtol (token, NULL, 10));
 		}
-		token = strtok_r(NULL, "/", &p);
+		token = strtok(NULL, "/");
 	} while (token != NULL);
 
 	delete [] token;

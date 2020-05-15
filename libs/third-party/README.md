@@ -1,6 +1,9 @@
-Here are third party libraries.
+## Here are third party libraries.
 
-To add a new library perform:
-1. cd libs/third-party
-2. git submodule add <gitrepository>
-3. git submodule init
+### To add a new library perform:
+* cd libs/third-party
+* git submodule add <gitrepository>
+
+### To download added libraries perform:
+* git submodule init
+* git submodule update

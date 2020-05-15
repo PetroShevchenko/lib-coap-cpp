@@ -1,12 +1,12 @@
 .PHONY: build lib examples docker-run install clean
 
-TARGET := POSIX
-#TARGET := RASPBERRY-PI-3
-#TARGET := STM32H747I-DISCO
+TARGET ?= POSIX
+#TARGET ?= RASPBERRY-PI-3
+#TARGET ?= STM32H747I-DISCO
 
-#DOCKER_FILE := dockerfile.ubuntu
-#DOCKER_FILE := dockerfile.debian
-DOCKER_FILE := dockerfile.fedora
+#DOCKER_FILE ?= dockerfile.ubuntu
+#DOCKER_FILE ?= dockerfile.debian
+DOCKER_FILE ?= dockerfile.fedora
 
 build: lib examples
 
@@ -15,8 +15,8 @@ lib:
 ifeq ($(TARGET),POSIX)
 	cd build/lib &&	cmake ../.. && make -j$(shell nproc || echo 2)
 else
-	cd build/lib &&	make -f ../../scripts/gmake/$(TARGET)/library.mk -j$(shell nproc || echo 2)
-	make -f ../../scripts/gmake/$(TARGET)/tests.mk -j$(shell nproc || echo 2)
+	cd build/lib &&	make all -f ../../scripts/gmake/$(TARGET)/library.mk -j$(shell nproc || echo 2)
+	cd build/lib && make all -f ../../scripts/gmake/$(TARGET)/tests.mk -j$(shell nproc || echo 2)
 endif
 
 examples:
@@ -24,7 +24,7 @@ examples:
 ifeq ($(TARGET),POSIX)
 	cd build/examples && cmake ../../examples/POSIX && make -j$(shell nproc || echo 2)
 else
-	cd build/examples && make -f ../../examples/$(TARGET)/Makefile -j$(shell nproc || echo 2)
+	cd build/examples && make all -f ../../examples/$(TARGET)/Makefile -j$(shell nproc || echo 2)
 endif
 
 docker-build: scripts/docker/$(DOCKER_FILE)
@@ -41,4 +41,10 @@ ifeq ($(TARGET),POSIX)
 endif
 
 clean:
+ifeq ($(TARGET),POSIX)
 	rm -rf build
+else
+	cd build/lib &&	make clean -f ../../scripts/gmake/$(TARGET)/library.mk
+	cd build/lib && make clean -f ../../scripts/gmake/$(TARGET)/tests.mk
+	cd build/examples && make clean -f ../../examples/$(TARGET)/Makefile
+endif

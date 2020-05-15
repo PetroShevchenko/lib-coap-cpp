@@ -3,7 +3,11 @@
 #include <climits>
 #include <algorithm>
 #include <ctime>
+#ifdef STM32H747I_DISCO
+#include "lwip.h"
+#else
 #include <arpa/inet.h>
+#endif
 
 #include "packet.h"
 #include "log.h"
@@ -138,14 +142,14 @@ bool packet::parse_header(const std::uint8_t * buffer, const size_t length)
 	LOG(DEBUGGING, "Entering");
 	if (length < PACKET_MIN_LENGTH) {
 		_error.set_code(WRONG_ARGUMENT);
-		LOG(ERROR, "Length of buffer is too short, must be at least ", PACKET_MIN_LENGTH, " bytes, but equals ", length);
+		LOG(logging::ERROR, "Length of buffer is too short, must be at least ", PACKET_MIN_LENGTH, " bytes, but equals ", length);
 		return false;
 	}
 	set_message_headerInfo(buffer[0]);
 
 	if (COAP_VERSION != get_message_version()) {
 		_error.set_code(PROTOCOL_VERSION);
-		LOG(ERROR, _error.get_message());
+		LOG(logging::ERROR, _error.get_message());
 		return false;
 	}
 	set_message_code(buffer[1]);
@@ -170,7 +174,7 @@ bool packet::parse_token(const std::uint8_t * buffer, const size_t length)
 	if (get_message_tokenLength() > TOKEN_MAX_LENGTH ||
 		length < PACKET_HEADER_SIZE + static_cast<size_t>(get_message_tokenLength())) {
 		_error.set_code(TOKEN_LENGTH);
-		LOG(ERROR, "Wrong the token lenght, that equals ", get_message_tokenLength(), "(0...8), and a packet length is ", length);
+		LOG(logging::ERROR, "Wrong the token lenght, that equals ", get_message_tokenLength(), "(0...8), and a packet length is ", length);
 		return false;
 	}
 	std::memcpy(_message.token, static_cast<const void *>(buffer + PACKET_HEADER_SIZE), get_message_tokenLength());
@@ -225,13 +229,13 @@ bool packet::parse_options(const std::uint8_t * buffer, const size_t length)
 
 		if ( !option_parser (opt.header.asBitfield.delta, &optDelta) ) {
 			_error.set_code(WRONG_OPTION_DELTA);
-			LOG(ERROR, _error.get_message());
+			LOG(logging::ERROR, _error.get_message());
 			return false;
 		}
 
 		if ( !option_parser (opt.header.asBitfield.length, &optLength) ) {
 			_error.set_code(WRONG_OPTION_LENGTH);
-			LOG(ERROR, _error.get_message());
+			LOG(logging::ERROR, _error.get_message());
 			return false;
 		}
 
@@ -239,7 +243,7 @@ bool packet::parse_options(const std::uint8_t * buffer, const size_t length)
 
 		if ((buffer + i + optLength) > (buffer + length)) {
 			_error.set_code(WRONG_OPTION_LENGTH);
-			LOG(ERROR,"Length of option is too long");
+			LOG(logging::ERROR,"Length of option is too long");
 			return false;
 		}
 		optNumber += optDelta;
@@ -308,7 +312,7 @@ const packet::option_t * packet::find_options(const std::uint16_t number, size_t
 	assert(quantity != nullptr);
 	LOG(DEBUGGING, "Entering");
 	*quantity = 0;
-	
+
 	std::sort(_message.options.begin(), _message.options.end(), compare_options);
 	for(auto opt: _message.options)
 	{
@@ -316,7 +320,7 @@ const packet::option_t * packet::find_options(const std::uint16_t number, size_t
 	}
 
 	LOG(DEBUGGING,"compared option number", (int)number);
-	
+
 	while (min <= max)
 	{
 		mid = (min + max) >> 1;
@@ -379,7 +383,7 @@ bool packet::serialize(std::uint8_t * buffer, size_t * length, bool checkBufferS
 	}
 	offset = MESSAGE_ID_OFFSET;
 
-	if (!checkBufferSizeOnly) {	
+	if (!checkBufferSizeOnly) {
 		if (get_is_little_endian()) {
 			buffer [offset] 	= (_message.messageId >> 8 ) & 0xFF;
 			buffer [offset + 1] = _message.messageId & 0xFF;

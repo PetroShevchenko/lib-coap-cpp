@@ -46,7 +46,7 @@ Firstly make sure that you have installed utilities described above, such as cma
 Then you should open a command terminal and compile the project.
 
 #### Compiling
-* cd lib-coap-cpp
+* cd ~/lib-coap-cpp
 * make build
 
 #### Installation
@@ -59,22 +59,25 @@ Currently, two hardware platforms are supported such as:
 
 Two compilation methods are available for Raspberry Pi 3 board, compilation on board and cross-compilation.
 If you want to use compilation on board you should set POSIX value to variable TARGET in Makefile.
-Otherside, you can compile library and examples on your Linux PC using cross-compilation.
+
+Otherside, you can compile library and examples on your Unix-like operation system using cross-compilation.
 For this it is necessary to install ARM toolchain from here
 https://github.com/raspberrypi/tools.
-How to install and setup the toolchain you can read by link
-https://www.raspberrypi.org/documentation/linux/kernel/building.md.
-ARM mbed-cli utility is used to build libarary and examples for STM32H747I Discovery board.
-How to install mbed-cli you can know by link
-https://os.mbed.com/docs/mbed-os/v5.15/tools/manual-installation.html.
+
+How to install and setup the toolchain you can read in README.md file from the directory examples/RASPBERRY-PI-3.
+
+Other ARM toolchain called arm-none-eabi is used to build libarary and examples for STM32H747I Discovery board.
+Here is used STM32CubeH7 library from manufacturer company STMicroelectronics.
+
+How to install and use ARM toolchain and STM32CubeH7 library you can know from README.md located in examples/STM32H747I-DISCO directory.
 
 #### Compiling
 * cd lib-coap-cpp
-* Open Makefile and choose one of available values for variable TARGET: POSIX, RASPBERRY-PI-3, STM32H747I-DISCO
+* Choose TARGET: POSIX, RASPBERRY-PI-3, STM32H747I-DISCO
 
-###### For example: TARGET := STM32H747I-DISCO
+###### For example TARGET is STM32H747I-DISCO
 
-* make build
+* make build TARGET=STM32H747I-DISCO
 
 #### Installation
 To install the firmware you should copy it to the device

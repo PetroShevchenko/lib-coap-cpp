@@ -98,6 +98,7 @@ The client loads some file from a COAP server using BLOCK-WISE transfers.
 Use an example cf-simplefile-server from the repository of Eclipse Californium as a COAP file server.
 Read README.md from https://github.com/eclipse/californium to build the server.
 Prepare some file to download from the server by COAP BLOCK-WISE protocol:
+* mkdir -p ~/californium/demo-apps/cf-simplefile-server/target/data
 * cp example.bin ~/californium/demo-apps/cf-simplefile-server/target/data
 
 

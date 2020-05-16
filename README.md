@@ -106,13 +106,9 @@ Prepare some file to download from the server by COAP BLOCK-WISE protocol:
 
 **$ mkdir -p ~/californium/demo-apps/cf-simplefile-server/target/data**
 
-**$ mkdir -p ~/californium/demo-apps/cf-simplefile-server/target/data**
-
 **$ cp example.bin ~/californium/demo-apps/cf-simplefile-server/target/data**
 
 Then launch cf-simplefile-server using following sequense of commands:
-
-**$ cd ~/californium/demo-apps/cf-simplefile-server/target**
 
 **$ cd ~/californium/demo-apps/cf-simplefile-server/target**
 
@@ -124,14 +120,10 @@ Build the whole lib-coap-cpp project or only examples if the library was built e
 
 **$ cd ~/lib-coap-cpp**
 
-**$ cd ~/lib-coap-cpp**
-
 **$ make examples**
 
 
 When the server is running you should launch the client:
-
-**$ cd ~/lib-coap-cpp/build/examples/coap-client**
 
 **$ cd ~/lib-coap-cpp/build/examples/coap-client**
 

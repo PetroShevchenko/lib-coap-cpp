@@ -1,4 +1,4 @@
-# A C++ open-source CoAP implementation
+# Open-source CoAP implementation in C++
 
 ## Introduction
 lib-coap-cpp is an open-source implementation of Constrained Application Protocol (CoAP).
@@ -29,28 +29,28 @@ To select one of the build options, select the name of the Docker file in the Ma
 Default file name is dockerfile.fedora.
 
 #### Compiling
-* cd lib-coap-cpp
-* make docker-build
+**$ cd ~/lib-coap-cpp**
+**$ make docker-build**
 
 #### Run the Docker container
-* make docker-run
+**$ make docker-run**
 
 After you see the prompt like this [root@89b23f25cfc7 /]# you can select the
 project directory and work with the project there :
 
-* cd /opt/lib-coap-cpp
-* ./build.sh
+**$ cd /opt/lib-coap-cpp**
+**$ ./build.sh**
 
 ### 1.2.Build in a Unix-like operating system
-Firstly make sure that you have installed utilities described above, such as cmake, gmake, g++.
+First, make sure that you have installed utilities described above, such as cmake, gmake, g++.
 Then you should open a command terminal and compile the project.
 
 #### Compiling
-* cd ~/lib-coap-cpp
-* make build
+**$ cd ~/lib-coap-cpp**
+**$ make build**
 
 #### Installation
-* make install
+**$ make install**
 
 ### 1.3.Build for other platforms using cross-compilation
 Currently, two hardware platforms are supported such as:
@@ -72,23 +72,23 @@ Here is used STM32CubeH7 library from manufacturer company STMicroelectronics.
 How to install and use ARM toolchain and STM32CubeH7 library you can know from README.md located in examples/STM32H747I-DISCO directory.
 
 #### Compiling
-* cd lib-coap-cpp
+**$ cd lib-coap-cpp**
 * Choose TARGET: POSIX, RASPBERRY-PI-3, STM32H747I-DISCO
 
 ###### For example TARGET is STM32H747I-DISCO
 
-* make build TARGET=STM32H747I-DISCO
+**$ make build TARGET=STM32H747I-DISCO**
 
 #### Installation
 To install the firmware you should copy it to the device
 
 ###### Example for Raspberry Pi 3:
-* cd lib-coap-cpp
-* scp build/examples/coap-client/coap-client /home/pi
+**$ cd ~/lib-coap-cpp**
+**$ scp build/examples/coap-client/coap-client /home/pi**
 
 ###### Example for STM32H747I Discovery:
-* cd lib-coap-cpp
-* cp build/examples/coap-client/coap-client.bin /run/media/$USER/DIS_H747XI
+**$ cd ~/lib-coap-cpp**
+**$ cp build/examples/coap-client/coap-client.bin /run/media/$USER/DIS_H747XI**
 
 ## Quickstart
 Let's consider an example of a coap client for POSIX.
@@ -98,24 +98,24 @@ The client loads some file from a COAP server using BLOCK-WISE transfers.
 Use an example cf-simplefile-server from the repository of Eclipse Californium as a COAP file server.
 Read README.md from https://github.com/eclipse/californium to build the server.
 Prepare some file to download from the server by COAP BLOCK-WISE protocol:
-* mkdir -p ~/californium/demo-apps/cf-simplefile-server/target/data
-* cp example.bin ~/californium/demo-apps/cf-simplefile-server/target/data
+**$ mkdir -p ~/californium/demo-apps/cf-simplefile-server/target/data**
+**$ cp example.bin ~/californium/demo-apps/cf-simplefile-server/target/data**
 
 
 Then launch cf-simplefile-server using following sequense of commands:
-* cd ~/californium/demo-apps/cf-simplefile-server/target
-* java -jar cf-simplefile-server-2.3.0-SNAPSHOT.jar
+**$ cd ~/californium/demo-apps/cf-simplefile-server/target**
+**$ java -jar cf-simplefile-server-2.3.0-SNAPSHOT.jar**
 
 
 #### Client
 Build the whole lib-coap-cpp project or only examples if the library was built earlier:
-* cd ~/lib-coap-cpp
-* make examples
+**$ cd ~/lib-coap-cpp**
+**$ make examples**
 
 
 When the server is running you should launch the client:
-* cd ~/lib-coap-cpp/build/examples/coap-client
-* ./coap-client -p 5683 -4 127.0.0.1 -f data/example.bin
+**$ cd ~/lib-coap-cpp/build/examples/coap-client**
+**$ ./coap-client -p 5683 -4 127.0.0.1 -f data/example.bin**
 
 
 When the file is loaded you can see following message "Block-wise transfer completed".

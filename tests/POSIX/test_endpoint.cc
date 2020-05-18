@@ -12,6 +12,7 @@ int main()
 	auto test_func = [&]()->bool
 	{
 		LOG(DEBUGGING,"It is test_func");
+		return true;
 	};
 
 	uriServerEndpoint::callback_t callbacks [METHODS_COUNT] = {

@@ -1,3 +1,4 @@
+set(TEST_PATH "tests/POSIX")
 set(TEST1_PROJECT_NAME "test_packet")
 set(TEST2_PROJECT_NAME "test_endpoint")
 set(TEST3_PROJECT_NAME "test_logging")
@@ -5,11 +6,11 @@ set(TEST4_PROJECT_NAME "test_uri")
 set(TEST5_PROJECT_NAME "coap_create")
 
 
-set(TEST1_SRC_LIST tests/test_packet.cc)
-set(TEST2_SRC_LIST tests/test_endpoint.cc)
-set(TEST3_SRC_LIST tests/test_logging.cc)
-set(TEST4_SRC_LIST tests/test_uri.cc)
-set(TEST5_SRC_LIST tests/coap_create.cc)
+set(TEST1_SRC_LIST ${TEST_PATH}/test_packet.cc)
+set(TEST2_SRC_LIST ${TEST_PATH}/test_endpoint.cc)
+set(TEST3_SRC_LIST ${TEST_PATH}/test_logging.cc)
+set(TEST4_SRC_LIST ${TEST_PATH}/test_uri.cc)
+set(TEST5_SRC_LIST ${TEST_PATH}/coap_create.cc)
 
 add_executable(${TEST1_PROJECT_NAME} ${TEST1_SRC_LIST})
 add_executable(${TEST2_PROJECT_NAME} ${TEST2_SRC_LIST})

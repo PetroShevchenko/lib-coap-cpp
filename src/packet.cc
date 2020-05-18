@@ -45,7 +45,7 @@ bool packet::clearInstance(packet & instance)
 	return true;
 }
 
-packet::packet()
+packet::packet(): _is_little_endian(true), _option_bitmap{0,0}, _message()
 {
 	LOG(DEBUGGING,"Entering");
 
@@ -187,7 +187,7 @@ bool packet::parse_options(const std::uint8_t * buffer, const size_t length)
 	const std::uint8_t * startOptions = buffer + PACKET_HEADER_SIZE + _message.headerInfo.asBitfield.tokenLength;
 	const size_t optionsOffset = static_cast<size_t>(startOptions - buffer);
 	size_t i = 0;
-	option_t opt = {0};
+	option_t opt;
 	uint16_t optDelta = 0;
 	uint16_t optLength = 0;
 	uint16_t optNumber = 0;
@@ -257,7 +257,7 @@ bool packet::parse_options(const std::uint8_t * buffer, const size_t length)
 		}
 
 		_message.options.push_back(opt);
-		opt = {0};
+		opt.clear();
 	}
 	_message.payloadOffset = i + sizeof(_message.payloadMarker);
 	LOG(DEBUGGING,"Leaving");

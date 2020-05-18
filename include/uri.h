@@ -26,6 +26,8 @@ public:
 		uri_type_t type;
 		std::vector <std::string> asString;
 		std::vector <long int> asInteger;
+		uri_s():type(URI_TYPE_INTEGER), asString(), asInteger(){}
+		~uri_s(){}
 	};
 
 protected:

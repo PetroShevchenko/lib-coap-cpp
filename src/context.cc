@@ -28,7 +28,8 @@ bool context::clearInstance(context & instance)
 	return true;
 }
 
-context::context()
+context::context():
+ _endpoints(0)
 {
 	LOG(DEBUGGING,"Entering");
 	//TODO

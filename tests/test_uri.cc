@@ -12,7 +12,9 @@ int main()
 
 	try {
 		//uri urin("/0/1/2/3");
-		uri::uri_t Uri = { uri::URI_TYPE_INTEGER};
+		uri::uri_t Uri;
+
+		Uri.type = uri::URI_TYPE_INTEGER;
 		Uri.asInteger = {0, 10, 20, 30};
 		//, asInteger = array };
 		uri urin(Uri);

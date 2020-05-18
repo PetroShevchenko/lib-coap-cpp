@@ -113,13 +113,12 @@ public:
 		\param [in] loggingLevels bitmap of enabled logging levels
 		\param [in] outputStream  stream to output a log
 	*/
-	log(std::uint8_t loggingLevels, std::ostream &outputStream)
+	log(std::uint8_t loggingLevels, std::ostream &outputStream):
+	_loggingLevels(loggingLevels), _stream(&outputStream), _print_header(true)
 	{
 		if (NONE == loggingLevels || ALL == loggingLevels)
 			_loggingLevels = loggingLevels;
 		else _loggingLevels = ALL;
-		_stream = &outputStream;
-		_print_header = true;
 	}
 	~log(){}
 private:
@@ -236,7 +235,7 @@ public:
 		else {
 			_print_header = true;
 		}
-    	*_stream << t << std::endl;
+    	*_stream << t << "\n\r";
     	_stream->flush();
 	}
 

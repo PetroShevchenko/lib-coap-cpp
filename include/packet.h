@@ -170,6 +170,14 @@ public:
 		} header;
 		std::uint16_t number;
 		std::vector<std::uint8_t> value;
+		option_s(): header{0},number(0),value{0}{}
+		~option_s(){}
+		void clear()
+		{
+			header.asByte = 0;
+			number = 0;
+			value.clear();
+		}
 	};
 
     friend bool operator<(const option_s & opt1, const option_s & opt2)
@@ -216,7 +224,7 @@ private:
 	};
 
 	using message_t =
-	struct {
+	struct message_s {
 		header_t headerInfo;
 		code_t code;
 		std::uint16_t messageId;
@@ -225,6 +233,8 @@ private:
 		const std::uint8_t payloadMarker = 0xFF;
 		size_t payloadOffset;
 		std::vector <uint8_t> payload;
+		message_s():headerInfo{0},code(),messageId(0),token{0}, options(), payloadMarker(),payloadOffset(0), payload() {}
+		~message_s(){}
 	};
 
 private:

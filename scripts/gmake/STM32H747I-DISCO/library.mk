@@ -76,7 +76,7 @@ OPTIMIZE_LEVEL			:= 2
 DEBUG_LEVEL				:= gdb
 
 TOOL_PATH				:= '$(HOME)/gcc-arm-none-eabi-9-2019-q4-major'
-SHELL					:= '/usr/bin/bash'
+#SHELL					:= '/usr/bin/bash'
 
 DEFINE					:= USE_HAL_DRIVER
 DEFINE					+= $(MCU_DEVICE)
@@ -137,7 +137,7 @@ endif
 
 CPPCFLAGS				+= $(CCFLAGS)
 CPPCFLAGS				+= -Weffc++ -Wextra -Wpedantic -Wshadow -Wundef -Wno-missing-field-initializers
-CPPCFLAGS				+= -std=c++14
+CPPCFLAGS				+= -std=c++11
 
 LDFLAGS					:= -T$(LD_SCRIPT_PATH)/$(LD_SCRIPT)
 LDFLAGS					+= -Wl,-Map,$(IMAGE).map,--cref -Wl,--gc-sections

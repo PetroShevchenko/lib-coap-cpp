@@ -40,8 +40,8 @@ protected:
     std::string _IPv6Address;
     int _port;
     int _descriptor;
-    std::uint8_t * _buffer;
     size_t _length;
+    std::uint8_t * _buffer;
     state_t _state; //curent state
     state_t _next_state; // next state
 	static bool checkNumberSystem(std::size_t start_index, std::size_t end_index,
@@ -50,13 +50,13 @@ protected:
 public:
 
 	connection(std::string hostname, int port):
-	_hostname(hostname), _port(port), _descriptor(0), _state(DISCONNECTED), _next_state(DISCONNECTED)
+	_hostname(hostname), _IPv4Address(""), _IPv6Address(""), _port(port), _descriptor(0), 
+	_length(BUFFER_MAX_SIZE), _buffer(nullptr), _state(DISCONNECTED), _next_state(DISCONNECTED)
 	{
 		if (port < 0 || port > USHRT_MAX) {
 			_error.set_code(PORT_NUMBER);
 			throw &_error;
 		}
-		_length = BUFFER_MAX_SIZE;
 		_buffer = new uint8_t [_length];
 	}
 
@@ -64,6 +64,9 @@ public:
 	{
 		delete [] _buffer;
 	}
+
+	connection(const connection &) = delete;
+	connection & operator=(const connection &) = delete;
 
 	virtual bool establish() = 0;
 	virtual bool disconnect() = 0;

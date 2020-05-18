@@ -10,7 +10,7 @@ namespace coap {
 
 error uri::_error;
 
-uri::uri(std::string path): _path(std::move(path))
+uri::uri(std::string path): _path(std::move(path)), _uri()
 {
 	if (!path_to_uri()) {
 		_error.set_code(WRONG_URI_PATH);
@@ -18,7 +18,7 @@ uri::uri(std::string path): _path(std::move(path))
 	}
 }
 
-uri::uri(uri::uri_t URI): _uri(std::move(URI))
+uri::uri(uri::uri_t URI): _path(""), _uri(std::move(URI))
 {
 	uri_to_path();
 }

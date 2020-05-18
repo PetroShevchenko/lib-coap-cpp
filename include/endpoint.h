@@ -21,7 +21,7 @@ protected:
 	std::vector<connection *> _connections;
 
 public:
-	endpoint (std::string name):  _name(name)
+	endpoint (std::string name):  _name(name), _connections(0)
 	{
 	}
 

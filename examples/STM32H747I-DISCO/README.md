@@ -12,7 +12,7 @@ To install toolchain after downloading perform following steps:
 
 **$ cp -r gcc-arm-none-eabi-9-2019-q4-major ~/**
 
-* add a directory to your toolchain in .bashrc file
+* add your toolchain directory to shell init script
 
 **$ vim ~/.bashrc**
 
@@ -70,3 +70,18 @@ After that you will be able to see a new virtual disk "DIS_H747XI".
 **$ cd ~/lib-coap-cpp**
 
 **$ cp build/examples/coap-client/coap-client.bin /run/media/$USER/DIS_H747XI**
+
+### Logging
+
+To see messages from logging system you should connect ST-Link USB connector by micro-USB cable to your PC.
+Then open virtual COM port /dev/ttyACM0 in minicom utility:
+
+**$ minicom -D /dev/ttyACM0 -b 115200**
+
+Make sure you are in dialout group using following command:
+
+**$ groups**
+
+To add yourself to the group please perform following command:
+
+**$ sudo usermod -a -G dialout {username}**

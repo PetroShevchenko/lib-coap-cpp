@@ -1,5 +1,9 @@
 # Open-source CoAP implementation in C++
 
+> ⚠️ **This repository is deprecated and is no longer maintained.**
+>
+> Development has moved to [libcoapcpp](https://github.com/PetroShevchenko/libcoapcpp.git).
+
 ## Introduction
 lib-coap-cpp is an open-source implementation of Constrained Application Protocol (CoAP).
 This is a library which can be linked with your source code.
